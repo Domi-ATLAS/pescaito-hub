@@ -1,12 +1,18 @@
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DataSet
-from flask import render_template, redirect, url_for, request
+from flask import request, render_template, flash, redirect, url_for, Blueprint
 from flask_login import login_required, current_user
 
 from app import db
 from app.modules.profile import profile_bp
 from app.modules.profile.forms import UserProfileForm
 from app.modules.profile.services import UserProfileService
+
+@profile_bp.route('/profile/me')
+@login_required
+def me_profile():
+    user_datasets = current_user.data_sets
+    return render_template('profile/me.html', user_profile=current_user.profile, user=current_user, datasets=user_datasets)
 
 
 @profile_bp.route("/profile/edit", methods=["GET", "POST"])
