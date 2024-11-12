@@ -24,9 +24,9 @@ from app.modules.hubfile.repositories import (
     HubfileViewRecordRepository
 )
 from core.services.BaseService import BaseService
+from flask import session
 
 logger = logging.getLogger(__name__)
-
 
 def calculate_checksum_and_size(file_path):
     file_size = os.path.getsize(file_path)
@@ -212,3 +212,39 @@ class SizeService():
             return f'{round(size / (1024 ** 2), 2)} MB'
         else:
             return f'{round(size / (1024 ** 3), 2)} GB'
+
+
+# Funciones para gestionar la selección de modelos en el carrito
+def add_to_cart(model_ids):
+    """
+    Función para agregar modelos seleccionados al carrito (sesión).
+    """
+    if 'selected_models' not in session:
+        session['selected_models'] = []
+
+    # Agregar modelos al carrito (evitar duplicados)
+    session['selected_models'].extend(model_id for model_id in model_ids if model_id not in session['selected_models'])
+    session.modified = True
+
+def get_cart():
+    """
+    Recupera los modelos seleccionados en el carrito.
+    """
+    return session.get('selected_models', [])
+
+def create_dataset_from_selected_models(models, user):
+    """
+    Crea un nuevo dataset a partir de los modelos seleccionados por el usuario.
+    """
+    # Crear un nuevo dataset
+    dataset = DataSet(user_id=user.id)
+    session.add(dataset)
+    session.commit()
+
+    # Asociar los modelos seleccionados con el dataset
+    for model in models:
+        dataset.feature_models.append(model)
+
+    session.commit()
+
+    return dataset

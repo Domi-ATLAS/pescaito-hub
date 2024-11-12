@@ -1,0 +1,27 @@
+{% extends "base_template.html" %}
+
+{% block title %}Select models{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <h2>Select Feature Models</h2>
+        <form method="POST" action="{{ url_for('dataset.select_models') }}">
+            <div class="form-group">
+                {% for model in models %}
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="model_{{ model.id }}" name="models" value="{{ model.id }}">
+                        <label class="form-check-label" for="model_{{ model.id }}">{{ model.fm_meta_data.title}}</label>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Add to Cart</button>
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+        <script src="{{ url_for('zenodo.scripts') }}"></script>
+        <script src="{{ url_for('dataset.scripts') }}"></script>
+{% endblock %}

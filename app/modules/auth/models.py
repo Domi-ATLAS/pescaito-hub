@@ -33,3 +33,10 @@ class User(db.Model, UserMixin):
     def temp_folder(self) -> str:
         from app.modules.auth.services import AuthenticationService
         return AuthenticationService().temp_folder_by_user(self)
+
+    def temp_folder(self) -> str:
+        """
+        Devuelve el directorio temporal del usuario.
+        """
+        working_dir = os.getenv('WORKING_DIR', '')
+        return os.path.join(working_dir, 'temp', f'user_{self.id}')

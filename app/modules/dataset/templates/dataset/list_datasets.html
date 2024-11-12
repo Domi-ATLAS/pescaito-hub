@@ -7,9 +7,8 @@
     <h1 class="h3 mb-3">My datasets</h1>
 
     {% if datasets %}
-        <div class=" col-12">
+        <div class="col-12">
             <div class="card">
-
                 <div class="card-body">
                     <table class="table">
                         <thead>
@@ -46,9 +45,7 @@
                         </tbody>
                     </table>
                 </div>
-
             </div>
-
         </div>
     {% else %}
         <div class="col-12 col-md-6">
@@ -68,8 +65,6 @@
     {% endif %}
 
     <div class="row">
-
-
         <div class="col-12">
             {% if local_datasets %}
                 <div class="card">
@@ -114,5 +109,11 @@
                 </div>
             {% endif %}
         </div>
+
+        <!-- Botón para seleccionar feature models y crear un nuevo dataset -->
+        <div class="col-12 mt-3">
+            <a href="{{ url_for('dataset.select_models') }}" class="btn btn-success">Select Feature Models to Create Dataset</a>
+        </div>
+    </div>
 
 {% endblock %}
