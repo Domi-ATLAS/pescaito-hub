@@ -45,15 +45,50 @@
 
                     <div class="row">
 
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="query">
-                                    Search for datasets by title, description, authors, tags, UVL files...
-                                </label>
-                                <input class="form-control" id="query" name="query" required="" type="text"
-                                       value="" autofocus>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="query">
+                                                Search for datasets by title, description, authors, tags, UVL files...
+                                            </label>
+                                            <input class="form-control" id="query" name="query" required="" type="text" value="" autofocus oninput="send_query()">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="min_features">Min Features</label>
+                                            <input class="form-control" id="min_features" name="min_features" type="number" placeholder="Min Features" oninput="send_query()">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="max_features">Max Features</label>
+                                            <input class="form-control" id="max_features" name="max_features" type="number" placeholder="Max Features" oninput="send_query()">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="min_products">Min Products</label>
+                                            <input class="form-control" id="min_products" name="min_products" type="number" placeholder="Min Products" oninput="send_query()">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="max_products">Max Products</label>
+                                            <input class="form-control" id="max_products" name="max_products" type="number" placeholder="Max Products" oninput="send_query()">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        <div id="results"></div>
 
                         <div class="col-lg-6">
                             <div class="mb-3">
