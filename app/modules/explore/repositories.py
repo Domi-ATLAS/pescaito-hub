@@ -15,20 +15,22 @@ class ExploreRepository(BaseRepository):
         normalized_query = unidecode.unidecode(query).lower()
         cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
 
-        filters = []
-        for word in cleaned_query.split():
-            filters.append(DSMetaData.title.ilike(f"%{word}%"))
-            filters.append(DSMetaData.description.ilike(f"%{word}%"))
-            filters.append(Author.name.ilike(f"%{word}%"))
-            filters.append(Author.affiliation.ilike(f"%{word}%"))
-            filters.append(Author.orcid.ilike(f"%{word}%"))
-            filters.append(FMMetaData.uvl_filename.ilike(f"%{word}%"))
-            filters.append(FMMetaData.title.ilike(f"%{word}%"))
-            filters.append(FMMetaData.description.ilike(f"%{word}%"))
-            filters.append(FMMetaData.publication_doi.ilike(f"%{word}%"))
-            filters.append(FMMetaData.tags.ilike(f"%{word}%"))
-            filters.append(DSMetaData.tags.ilike(f"%{word}%"))
+        # Aplicar una coincidencia exacta con el `query` completo en cada campo, en el orden de las palabras
+        filters = [
+            DSMetaData.title.ilike(f"%{cleaned_query}%"),
+            DSMetaData.description.ilike(f"%{cleaned_query}%"),
+            Author.name.ilike(f"%{cleaned_query}%"),
+            Author.affiliation.ilike(f"%{cleaned_query}%"),
+            Author.orcid.ilike(f"%{cleaned_query}%"),
+            FMMetaData.uvl_filename.ilike(f"%{cleaned_query}%"),
+            FMMetaData.title.ilike(f"%{cleaned_query}%"),
+            FMMetaData.description.ilike(f"%{cleaned_query}%"),
+            FMMetaData.publication_doi.ilike(f"%{cleaned_query}%"),
+            FMMetaData.tags.ilike(f"%{cleaned_query}%"),
+            DSMetaData.tags.ilike(f"%{cleaned_query}%"),
+        ]
 
+        # Aplicar el filtro para la búsqueda exacta
         datasets = (
             self.model.query
             .join(DataSet.ds_meta_data)
@@ -36,26 +38,22 @@ class ExploreRepository(BaseRepository):
             .join(DataSet.feature_models)
             .join(FeatureModel.fm_meta_data)
             .filter(or_(*filters))
-            .filter(DSMetaData.dataset_doi.isnot(None))  # Exclude datasets with empty dataset_doi
+            .filter(DSMetaData.dataset_doi.isnot(None))  # Excluir datasets sin `dataset_doi`
         )
 
+         # Filtro por tipo de publicación, si es necesario
         if publication_type != "any":
-            matching_type = None
-            for member in PublicationType:
-                if member.value.lower() == publication_type:
-                    matching_type = member
-                    break
-
-            if matching_type is not None:
+            matching_type = next(
+                (member for member in PublicationType if member.value.lower() == publication_type), None
+            )
+            if matching_type:
                 datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
 
+        # Filtro por etiquetas
         if tags:
             datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))
 
-        # Order by created_at
-        if sorting == "oldest":
-            datasets = datasets.order_by(self.model.created_at.asc())
-        else:
-            datasets = datasets.order_by(self.model.created_at.desc())
+        # Ordenar los resultados
+        datasets = datasets.order_by(self.model.created_at.asc() if sorting == "oldest" else self.model.created_at.desc())
 
         return datasets.all()
