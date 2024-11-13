@@ -29,6 +29,34 @@
 
 </div>
 
+<div class="row mb-3">
+
+    <div class="col-6">
+        <div class="btn-group" id="rating-buttons" role="group" aria-label="Rating">
+            <button type="button" class="btn" style="background-color: #DC3545;" data-rating="1">
+                <i data-feather="star"></i>
+            </button>
+            <button type="button" class="btn" style="background-color: #fd7e14;" data-rating="2">
+                <i data-feather="star"></i>
+            </button>
+            <button type="button" class="btn" style="background-color: #FFEB3B;" data-rating="3">
+                <i data-feather="star"></i>
+            </button>
+            <button type="button" class="btn" style="background-color: #66BB6A;" data-rating="4">
+                <i data-feather="star"></i>
+            </button>
+            <button type="button" class="btn" style="background-color: #5BC0EB;" data-rating="5">
+                <i data-feather="star"></i>
+            </button>
+        </div>
+        <p id="rating-label">Rate this dataset!</p>
+    </div>
+
+
+</div>
+
+
+
 <div class="row">
 
     <div class="col-xl-8 col-lg-12 col-md-12 col-sm-12">
@@ -155,7 +183,6 @@
                 </div>
 
                 
-
             </div>
 
             {% if dataset.ds_meta_data.dataset_doi %}

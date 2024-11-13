@@ -49,6 +49,8 @@ class DataSetService(BaseService):
         self.dsviewrecord_repostory = DSViewRecordRepository()
         self.hubfileviewrecord_repository = HubfileViewRecordRepository()
 
+    
+
     def move_feature_models(self, dataset: DataSet):
         current_user = AuthenticationService().get_authenticated_user()
         source_dir = current_user.temp_folder()
@@ -61,6 +63,15 @@ class DataSetService(BaseService):
         for feature_model in dataset.feature_models:
             uvl_filename = feature_model.fm_meta_data.uvl_filename
             shutil.move(os.path.join(source_dir, uvl_filename), dest_dir)
+
+    def update_rating(self, dataset_id: int, rating: int) -> DataSet:
+        dataset = self.dataset_repository.get_by_id(dataset_id)
+        dataset.totalRatings += rating
+        dataset.numRatings += 1
+        dataset.avgRating = dataset.totalRatings / dataset.numRatings
+        self.dataset_repository.update(dataset)
+        return dataset
+        
 
     def get_synchronized(self, current_user_id: int) -> DataSet:
         return self.repository.get_synchronized(current_user_id)
