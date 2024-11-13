@@ -30,30 +30,94 @@
 </div>
 
 <div class="row mb-3">
-
     <div class="col-6">
-        <div class="btn-group" id="rating-buttons" role="group" aria-label="Rating">
-            <button type="button" class="btn" style="background-color: #DC3545;" data-rating="1">
-                <i data-feather="star"></i>
-            </button>
-            <button type="button" class="btn" style="background-color: #fd7e14;" data-rating="2">
-                <i data-feather="star"></i>
-            </button>
-            <button type="button" class="btn" style="background-color: #FFEB3B;" data-rating="3">
-                <i data-feather="star"></i>
-            </button>
-            <button type="button" class="btn" style="background-color: #66BB6A;" data-rating="4">
-                <i data-feather="star"></i>
-            </button>
-            <button type="button" class="btn" style="background-color: #5BC0EB;" data-rating="5">
-                <i data-feather="star"></i>
-            </button>
+        <div class="star-rating" id="star-rating" role="group" aria-label="Rating">
+            <span class="star" data-rating="1"><i class="fa fa-star"></i></span>
+            <span class="star" data-rating="2"><i class="fa fa-star"></i></span>
+            <span class="star" data-rating="3"><i class="fa fa-star"></i></span>
+            <span class="star" data-rating="4"><i class="fa fa-star"></i></span>
+            <span class="star" data-rating="5"><i class="fa fa-star"></i></span>
         </div>
         <p id="rating-label">Rate this dataset!</p>
     </div>
-
-
 </div>
+
+<script>
+    const stars = document.querySelectorAll('.star');
+    const ratingLabel = document.getElementById('rating-label');
+    let currentRating = 0;
+
+    function updateStars(rating) {
+        stars.forEach((star, index) => {
+            star.classList.remove('full', 'half');
+            const starRating = index + 1;
+            if (starRating <= rating) {
+                star.classList.add('full');
+            } else if (starRating - 0.5 <= rating) {
+                star.classList.add('half');
+            }
+        });
+    }
+
+    stars.forEach(star => {
+
+        //Setteamos el rating al hacer clic
+        star.addEventListener('click', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const starWidth = rect.width;
+            currentRating = parseFloat(star.dataset.rating) - (mouseX < starWidth / 2 ? 0.5 : 0);
+            ratingLabel.innerText = `You rated this ${currentRating} star${currentRating > 1 ? 's' : ''}!`;
+            updateStars(currentRating);
+        });
+
+        // El hover establece qué puntuación
+        star.addEventListener('mousemove', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const starWidth = rect.width;
+
+            // Cursor en la mitad anterior o posterior
+            const hoverRating = parseFloat(star.dataset.rating) - (mouseX < starWidth / 2 ? 0.5 : 0);
+            updateStars(hoverRating);
+        });
+
+        // Al salir el mouse, resetea
+        star.addEventListener('mouseleave', () => {
+            updateStars(currentRating);
+        });
+    });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .star-rating {
+        font-size: 24px;
+        display: inline-block;
+    }
+
+    .star {
+        color: lightgray;
+        cursor: pointer;
+        position: relative;
+        display: inline-block;
+    }
+
+    .star.full i {
+        color: #FFD700; /* gold color for full stars */
+    }
+
+    .star.half i {
+        background: linear-gradient(90deg, #FFD700 50%, lightgray 50%);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    .star i {
+        color: lightgray;
+    }
+</style>
 
 
 
