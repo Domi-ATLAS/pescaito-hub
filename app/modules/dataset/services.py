@@ -65,11 +65,17 @@ class DataSetService(BaseService):
             shutil.move(os.path.join(source_dir, uvl_filename), dest_dir)
 
     def update_rating(self, dataset_id: int, rating: int) -> DataSet:
-        dataset = self.dataset_repository.get_by_id(dataset_id)
+        dataset = self.repository.get_by_id(dataset_id)
+
+        if dataset.totalRatings is None:
+            dataset.totalRatings = 0
+        if dataset.numRatings is None:
+            dataset.numRatings = 0
+
         dataset.totalRatings += rating
         dataset.numRatings += 1
         dataset.avgRating = dataset.totalRatings / dataset.numRatings
-        self.dataset_repository.update(dataset)
+        self.repository.update(dataset)
         return dataset
         
 

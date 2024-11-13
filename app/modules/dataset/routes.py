@@ -44,25 +44,14 @@ zenodo_service = ZenodoService()
 doi_mapping_service = DOIMappingService()
 ds_view_record_service = DSViewRecordService()
 
-
-@dataset_bp.route("/dataset/<int:dataset_id>/update_rating/<int:rating>", methods=["PUT"])
+@dataset_bp.route('/dataset/<int:dataset_id>/update_rating/<int:rating>', methods=['POST', 'PUT','GET'])
 @login_required
-def update_rating(dataset_id):
-    data = request.json
-    new_rating = data.get("rating")
-    
-    if new_rating is None or not (0 <= new_rating <= 5):
-        return jsonify({"message": "Rating must be between 0 and 5"}), 400
-
+def update_rating(dataset_id, rating):    
     try:
-        # Llamar al servicio para actualizar el rating del dataset
-        dataset_service.update_rating(dataset_id, new_rating)
-        return jsonify({"message": "Rating updated successfully"}), 200
-    except ValueError as ve:
-        return jsonify({"message": str(ve)}), 404
+        updated_dataset = dataset_service.update_rating(dataset_id, rating)
+        return jsonify({"message": "Rating updated successfully"})
     except Exception as e:
-        logger.exception("Error updating rating")
-        return jsonify({"message": "Error updating rating"}), 500
+        return jsonify({"error": str(e)}), 400
 
 
 @dataset_bp.route("/dataset/upload", methods=["GET", "POST"])

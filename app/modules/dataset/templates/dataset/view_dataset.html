@@ -29,65 +29,54 @@
 
 </div>
 
-<div class="row mb-3">
-    <div class="col-6">
-        <div class="star-rating" id="star-rating" role="group" aria-label="Rating">
-            <span class="star" data-rating="1"><i class="fa fa-star"></i></span>
-            <span class="star" data-rating="2"><i class="fa fa-star"></i></span>
-            <span class="star" data-rating="3"><i class="fa fa-star"></i></span>
-            <span class="star" data-rating="4"><i class="fa fa-star"></i></span>
-            <span class="star" data-rating="5"><i class="fa fa-star"></i></span>
+<div>
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=1) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★</button>
         </div>
-        <p id="rating-label">Rate this dataset!</p>
     </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=2) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★</button>
+        </div>
+    </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=3) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★★</button>
+        </div>
+    </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=4) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★★★</button>
+        </div>
+    </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=5) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★★★★</button>
+        </div>
+    </div>
+</form>
+
 </div>
 
-<script>
-    const stars = document.querySelectorAll('.star');
-    const ratingLabel = document.getElementById('rating-label');
-    let currentRating = 0;
-
-    function updateStars(rating) {
-        stars.forEach((star, index) => {
-            star.classList.remove('full', 'half');
-            const starRating = index + 1;
-            if (starRating <= rating) {
-                star.classList.add('full');
-            } else if (starRating - 0.5 <= rating) {
-                star.classList.add('half');
-            }
-        });
-    }
-
-    stars.forEach(star => {
-
-        //Setteamos el rating al hacer clic
-        star.addEventListener('click', (e) => {
-            const rect = e.target.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const starWidth = rect.width;
-            currentRating = parseFloat(star.dataset.rating) - (mouseX < starWidth / 2 ? 0.5 : 0);
-            ratingLabel.innerText = `You rated this ${currentRating} star${currentRating > 1 ? 's' : ''}!`;
-            updateStars(currentRating);
-        });
-
-        // El hover establece qué puntuación
-        star.addEventListener('mousemove', (e) => {
-            const rect = e.target.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const starWidth = rect.width;
-
-            // Cursor en la mitad anterior o posterior
-            const hoverRating = parseFloat(star.dataset.rating) - (mouseX < starWidth / 2 ? 0.5 : 0);
-            updateStars(hoverRating);
-        });
-
-        // Al salir el mouse, resetea
-        star.addEventListener('mouseleave', () => {
-            updateStars(currentRating);
-        });
-    });
-</script>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 

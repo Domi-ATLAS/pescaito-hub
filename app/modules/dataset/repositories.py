@@ -72,7 +72,9 @@ class DataSetRepository(BaseRepository):
         return self.model.query.filter_by(id=dataset_id).first()
 
     def update(self, dataset: DataSet): 
-        self.db_session.commit()
+        updated_dataset =self.session.merge(dataset)
+        self.session.commit()
+        return updated_dataset
 
     def get_synchronized(self, current_user_id: int) -> DataSet:
         return (
