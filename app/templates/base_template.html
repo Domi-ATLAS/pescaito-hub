@@ -151,64 +151,49 @@ chico sundermann">
             <a class="sidebar-toggle js-sidebar-toggle">
                 <i class="hamburger align-self-center"></i>
             </a>
-        
+
             <form class="d-none d-sm-inline-block" onsubmit="submitSearchForm(event)">
                 <div class="input-group input-group-navbar">
-                    <input type="text" id="search-query" class="form-control rounded-search" placeholder="Search datasets..." aria-label="Search">
+                    <input type="text" id="search-query" class="form-control rounded-search"
+                           placeholder="Search datasets..." aria-label="Search">
                 </div>
             </form>
 
-            <li class="nav-item dropdown">
-                <button class="btn btn-outline-primary" id="filterButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    Filter
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="filterButton">
-                    <li>
-                        <label for="publication_type" class="dropdown-item">Filter by publication type</label>
-                        <select class="form-control" id="publication_type" name="publication_type" aria-label="Filter by publication type">
-                            <option value="any">Any</option>
-                            <option value="none">None</option>
-                            <option value="annotationcollection">Annotation Collection</option>
-                            <option value="book">Book</option>
-                            <!-- Agrega más opciones según sea necesario -->
-                            <option value="workingpaper">Working Paper</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </li>
-                    <li>
-                        <button class="dropdown-item" id="apply-filters">Apply filters</button>
-                    </li>
-                    <li>
-                        <button class="dropdown-item" id="clear-filters">Clear filters</button>
-                    </li>
-                </ul>
-            </li>
-            
-        
             <div class="navbar-collapse collapse">
                 <ul class="navbar-nav navbar-align">
                     <li class="nav-item dropdown">
+
                         {% if current_user.is_anonymous %}
-                            <a class="nav-link d-none d-sm-inline-block" href="{{ url_for('auth.login') }}">Login</a>
-                            <a class="nav-link d-none d-sm-inline-block" href="{{ url_for('auth.show_signup_form') }}">Sign up</a>
+                            <a class="nav-link  d-none d-sm-inline-block" href="{{ url_for('auth.login') }}">Login</a>
+                            <a class="nav-link  d-none d-sm-inline-block" href="{{ url_for('auth.show_signup_form') }}">Sign
+                                up</a>
+
                         {% else %}
-                            <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
-                                <span class="text-dark">{{ current_user.profile.surname }}, {{ current_user.profile.name }}</span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="{{ url_for('profile.my_profile') }}">
-                                    <i class="align-middle me-1" data-feather="user"></i> My profile
-                                </a>
-                                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                    <i class="align-middle me-1" data-feather="log-out"></i> Log out
-                                </a>
-                            </div>
+
+                        <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
+                            <i class="align-middle" data-feather="user"></i> 
+                        </a>
+
+                        <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+                            <span class="text-dark">{{ current_user.profile.surname }}, {{ current_user.profile.name }}</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="{{ url_for('profile.my_profile') }}">
+                                <i class="align-middle me-1" data-feather="user"></i> My profile</a>
+                            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                <i class="align-middle me-1" data-feather="log-out"></i> Log out</a>
+                        </div>
+                        
+                        
+
                         {% endif %}
+
+
                     </li>
                 </ul>
             </div>
         </nav>
-        
+
         <main class="content">
             <div class="container p-0">
 

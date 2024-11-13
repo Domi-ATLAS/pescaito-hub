@@ -38,22 +38,27 @@ class ExploreRepository(BaseRepository):
             .join(DataSet.feature_models)
             .join(FeatureModel.fm_meta_data)
             .filter(or_(*filters))
-            .filter(DSMetaData.dataset_doi.isnot(None))  # Excluir datasets sin `dataset_doi`
+            .filter(DSMetaData.dataset_doi.isnot(None))  # Exclude datasets with empty dataset_doi
         )
 
-         # Filtro por tipo de publicación, si es necesario
         if publication_type != "any":
-            matching_type = next(
-                (member for member in PublicationType if member.value.lower() == publication_type), None
+            matching_type = None
+            for member in PublicationType:
+                if member.value.lower() == publication_type:
+                    matching_type = member
+                    break
+
+            if matching_type is not None:
+                matching_type = next(
+                    (member for member in PublicationType if member.value.lower() == publication_type), None
             )
             if matching_type:
                 datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
 
-        # Filtro por etiquetas
         if tags:
             datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))
 
-        # Ordenar los resultados
+        # Order by created_at
         datasets = datasets.order_by(self.model.created_at.asc() if sorting == "oldest" else self.model.created_at.desc())
 
         return datasets.all()
