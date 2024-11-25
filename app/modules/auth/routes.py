@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, flash, current_app
 from flask_login import current_user, login_user, logout_user
-from itsdangerous import TimedSerializer as Serializer
+from itsdangerous import URLSafeTimedSerializer as Serializer
 from app.modules.auth import auth_bp
 from app.modules.auth.forms import SignupForm, LoginForm, PasswordRecoveryForm  # El formulario de recuperación
 from app.modules.auth.services import AuthenticationService
@@ -57,8 +57,16 @@ def logout():
 
 # Función para generar el token
 def generate_reset_token(email):
-    s = Serializer(current_app.config['SECRET_KEY'], expires_in=600)  # 10 minutos de expiración
-    return s.dumps({'email': email}).decode('utf-8')
+    s = Serializer(current_app.config['SECRET_KEY'])
+    return s.dumps({'email': email})  # No necesitas `decode('utf-8')` en versiones modernas
+
+def verify_reset_token(token):
+    s = Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data = s.loads(token, max_age=600)  # Token válido por 10 minutos
+    except Exception:
+        return None  # Token inválido o expirado
+    return data.get('email')  # Devuelve el email contenido en el token
 
 # Función para enviar el correo con el enlace de recuperación
 def send_reset_email(user_email):
@@ -94,42 +102,56 @@ def recover_password():
 
     if form.validate_on_submit():
         email = form.email.data
-        # Enviar correo de recuperación de contraseña
+        user = User.query.filter_by(email=email).first()  # Busca el usuario en la BD
+        if not user:
+            flash("No existe una cuenta asociada con ese correo", "error")
+            return render_template("auth/recover_password_form.html", form=form)
+
+        # Genera el token y envía el correo
         try:
-            msg = Message('Recuperación de contraseña',
-                          recipients=[email])
-            msg.body = "Este es un correo para la recuperación de tu contraseña."
-            mail.send(msg)  # Usamos mail aquí
+            token = generate_reset_token(email)
+            reset_url = url_for('auth.reset_password', token=token, _external=True)
+
+            msg = Message(
+                'Recuperación de contraseña',
+                recipients=[email],
+                body=f"Haz clic en el siguiente enlace para restablecer tu contraseña: {reset_url}"
+            )
+            mail.send(msg)
+            flash("Hemos enviado un correo con las instrucciones para restablecer tu contraseña.", "success")
             return redirect(url_for('auth.password_recovery_success'))
+
         except Exception as e:
-            return render_template("auth/recover_password_form.html", form=form, error=str(e))
+            flash(f"Error al enviar el correo: {e}", "error")
+            return render_template("auth/recover_password_form.html", form=form)
 
     return render_template("auth/recover_password_form.html", form=form)
 
+
 # Función para verificar el token
-def verify_reset_token(token):
-    s = Serializer(current_app.config['SECRET_KEY'])
-    try:
-        data = s.loads(token)
-    except:
-        return None  # Token inválido o expirado
-    return data['email']
+from werkzeug.security import generate_password_hash
 
-
-# Ruta para resetear la contraseña
 @auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     email = verify_reset_token(token)
     if not email:
-        flash('That is an invalid or expired token', 'error')
+        flash('El token es inválido o ha expirado', 'error')
         return redirect(url_for('auth.recover_password'))
 
-    user = User.query.filter_by(email=email).first()  # Obtén el usuario por correo
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash('Usuario no encontrado', 'error')
+        return redirect(url_for('auth.recover_password'))
+
     if request.method == 'POST':
-        new_password = request.form['password']  # La nueva contraseña que el usuario ingresa
-        user.password = new_password  # Aquí deberías encriptar la contraseña antes de guardarla
-        db.session.commit()  # Guarda la nueva contraseña en la base de datos
-        flash('Your password has been updated!', 'success')
+        new_password = request.form['password']
+        if not new_password:
+            flash('La contraseña no puede estar vacía.', 'error')
+            return render_template('auth/reset_password.html', token=token)
+
+        user.password = generate_password_hash(new_password)  # Encripta la contraseña
+        db.session.commit()
+        flash('Tu contraseña ha sido actualizada exitosamente.', 'success')
         return redirect(url_for('auth.login'))
 
-    return render_template('auth/reset_password.html', token=token)  # Muestra el formulario para cambiar la contraseña
+    return render_template('auth/reset_password.html', token=token)

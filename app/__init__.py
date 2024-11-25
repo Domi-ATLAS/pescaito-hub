@@ -28,14 +28,14 @@ def create_app(config_name='development'):
     config_manager = ConfigManager(app)
     config_manager.load_config(config_name=config_name)
 
-    # Configuración de Flask-Mail
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # O el servidor SMTP que estés usando
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True  # Habilitar TLS
-    app.config['MAIL_USE_SSL'] = False
-    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')  # Usuario de correo
-    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # Contraseña del correo o app-specific password
-    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')  # Correo por defecto para enviar
+    # Configuración de Flask-Mail para Outlook/Hotmail
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587  # Puerto para TLS
+    app.config['MAIL_USE_TLS'] = True  # Usar TLS
+    app.config['MAIL_USE_SSL'] = False  # No usar SSL
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')  # Tu correo de Gmail
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # La contraseña de la aplicación de Gmail
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')  # El correo por defecto para enviar
 
     # Inicialización de Flask-Mail
     mail.init_app(app)
