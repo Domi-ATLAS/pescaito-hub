@@ -6,6 +6,7 @@ from app.modules.auth.forms import SignupForm, LoginForm, PasswordRecoveryForm  
 from app.modules.auth.services import AuthenticationService
 from app.modules.profile.services import UserProfileService
 from app.modules.auth.models import User  # Asumimos que el modelo de Usuario está en auth.models
+from app import db
 
 # Configuración
 authentication_service = AuthenticationService()
