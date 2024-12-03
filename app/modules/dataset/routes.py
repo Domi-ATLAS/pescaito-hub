@@ -6,8 +6,11 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from zipfile import ZipFile
+from app import db  
 
 from flask import (
+    flash,
+    send_file,
     session,
     redirect,
     render_template,
@@ -123,6 +126,9 @@ def list_dataset():
 @dataset_bp.route("/cart/select_models", methods=["GET", "POST"])
 @login_required
 def select_models():
+    # Limpiar el carrito antes de mostrar la selección de modelos
+    session['selected_models'] = []
+    session.modified = True
     models = FeatureModel.query.all()  # Obtenemos todos los modelos disponibles
     if request.method == "POST":
         model_ids = request.form.getlist("models")  # Recuperamos los modelos seleccionados
@@ -145,8 +151,18 @@ def view_cart():
 def create_dataset_from_cart():
     selected_model_ids = get_cart()
     selected_models = FeatureModel.query.filter(FeatureModel.id.in_(selected_model_ids)).all()
-    dataset = create_dataset_from_selected_models(selected_models, current_user)
-    return render_template('dataset/dataset_created.html', dataset=dataset)
+
+    if not selected_models:
+        return jsonify({"message": "No hay modelos seleccionados para crear el dataset"}), 400
+
+    zip_path = create_dataset_from_selected_models(selected_models, current_user) # Creo el dataset
+    
+    return send_file(
+        zip_path,
+        as_attachment=True,
+        download_name='selected_models.zip',
+        mimetype='application/zip'
+    )
 
 
 # **Rutas de archivos**
@@ -299,3 +315,4 @@ def get_unsynchronized_dataset(dataset_id):
         abort(404)
 
     return render_template("dataset/view_dataset.html", dataset=dataset)
+

@@ -2,10 +2,14 @@ import logging
 import os
 import hashlib
 import shutil
+import tempfile
 from typing import Optional
 import uuid
+from zipfile import ZipFile
+from app.modules.hubfile.services import HubfileService
 
 from flask import request
+from app import db  
 
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
@@ -236,15 +240,44 @@ def create_dataset_from_selected_models(models, user):
     """
     Crea un nuevo dataset a partir de los modelos seleccionados por el usuario.
     """
-    # Crear un nuevo dataset
-    dataset = DataSet(user_id=user.id)
-    session.add(dataset)
-    session.commit()
+    try:
+        # Crea un nuevo objeto DSMetaData con los valores necesarios
+        ds_meta_data = DSMetaData(
+            title=f"Dataset de modelos seleccionados {len(models)}",
+            description="Incluye modelos de características seleccionados por el usuario.",
+            publication_type="DATA_MANAGEMENT_PLAN",  # Valor ajustado para coincidir con el enum
+            publication_doi=None
+        )
+        db.session.add(ds_meta_data)
+        db.session.commit()
 
-    # Asociar los modelos seleccionados con el dataset
-    for model in models:
-        dataset.feature_models.append(model)
+        # Crear un nuevo objeto DataSet con un ds_meta_data_id válido
+        dataset = DataSet(user_id=user.id, ds_meta_data_id=ds_meta_data.id)
+        db.session.add(dataset)
+        db.session.commit()
 
-    session.commit()
+        # Asociar los modelos seleccionados con el dataset
+        for model in models:
+            dataset.feature_models.append(model)
 
-    return dataset
+        # Confirmar los cambios
+        db.session.commit()
+
+        # Crear un archivo ZIP con los modelos seleccionados
+        temp_dir = tempfile.mkdtemp()
+        zip_path = os.path.join(temp_dir, f'dataset_{dataset.id}.zip')
+
+        with ZipFile(zip_path, 'w') as zipf:
+            for model in models:
+                # Suponiendo que los archivos .uvl estén en una carpeta llamada "uv_examples"
+                model_dir = os.path.join('app/modules/dataset/uvl_examples')
+                for file_name in os.listdir(model_dir):
+                    if file_name.endswith('.uvl') and file_name.startswith(f'file{model.id}'):
+                        full_path = os.path.join(model_dir, file_name)
+                        zipf.write(full_path, os.path.basename(full_path))
+
+        return zip_path  # Retornar la ruta al archivo ZIP creado
+    except Exception as exc:
+        logger.error(f"Error al crear el dataset a partir de los modelos seleccionados: {exc}")
+        db.session.rollback()
+        raise exc
