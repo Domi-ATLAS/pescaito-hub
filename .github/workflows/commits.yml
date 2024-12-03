@@ -13,6 +13,16 @@ jobs:
   check:
     name: Conventional Commits
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: webiny/action-conventional-commits@v1.0.3
+      - name: Validate Commit Description Length
+        run: |
+          git log -n 10 --pretty=format:"%H" | while read -r hash; do
+            body=$(git show -s --format=%b $hash) # Obtener solo el cuerpo del commit
+            description_length=${#body}
+            if [[ $description_length -gt 500 ]]; then
+              echo "Error: The body of commit $hash exceeds 500 characters." && exit 1
+            fi
+          done
