@@ -117,4 +117,166 @@ Se aplicarán las siguientes penalizaciones para aquellos miembros que incumplan
 ### **3. Expulsión del Equipo**
 - Si tras agotar las medidas anteriores el miembro no cumple con sus responsabilidades, se procederá a su expulsión definitiva.  
 - La decisión será tomada por consenso o votación del equipo y documentada en acta.  
-- En caso de expulsión, las tareas y responsabilidades del miembro serán redistribuidas para no comprometer los plazos ni la calidad del proyecto.  
+- En caso de expulsión, las tareas y responsabilidades del miembro serán redistribuidas para no comprometer los plazos ni la calidad del proyecto.
+
+---
+
+## Documentación
+
+La documentación a entregar por el equipo será:
+
+**Acta fundacional:** Este mismo documento, en el que se recoge la información más importante del proyecto, el equipo de trabajo y los procedimientos a seguir
+
+**Diario de equipo:** Se recoge el trabajo semanal de los miembros individualmente y la valoración del mismo
+
+**Politicas:** Distintos documentos que describen los procedimientos y directrices de trabajo a acatar por todos los miembros
+
+**Documento del proyecto** 
+
+---
+
+## Gestión de ramas
+
+Aquí se describen, a modo de resumen, los apartados mas importantes de la gestión de ramas del proyecto.
+Las ramas utilizadas son:
+
+**Main:** Rama principal en la cual solo se encuentra código estable y funcional
+
+Formato: main
+
+
+**Develop:** Unica rama que debe entrar converger con main, usada a modo de cortafuegos. El resto de ramas convergen en ella
+
+Formato: develop
+
+
+**Feature:** Rama destinada a funcionalidades o caracteristicas concretas. Estas branches nacen en develop, y una vez se finaliza la implementación de la funcionalidad necesaria mergean en la misma.
+
+Formato: feature/<nombre-descriptivo>
+Ejemplo: feature/autenticación-usuario
+
+Para profundizar más en la gestión de ramas, se debe leer el documento correspondiente
+
+---
+
+## Gestión de issues
+
+Aquí se describen, a modo de resumen, los apartados mas importantes de la gestión de issues del proyecto. Las etiquetas usadas para identificar su propósito y prioridad son:
+
+**Feature:** Implementación o mejora de funcionalidad
+
+**Bug:** Reporte de errores que causa fallos o comportamientos inesperados
+
+**Enhacement:** Sugerencia de mejora de una funcionalidad
+
+**Docs:** Creación o actualización de documentos
+
+**Chore:** Enfocado a actualización de dependencias, configuración o mantenimiento.
+
+**Research:** Investigación o consulta a modo de analisis para implementar una funcionalidad o correguir un error
+
+
+Para la creación de una issue:
+
+- El *titulo* debe ser claro y conciso
+  
+- La *descripción* debe resumir su cometido, con los pasos a seguir para obtener la solución, el comportamiento o
+solución esperado, y el contenido adicional y versionado si procede.
+
+- Cada issue debe tener tantas *etiquetas* como sea necesario para describir sus funciones y prioridades
+
+Acerca de las *prioridades*, estas son:
+
+- **High:** Problemas críticos de máxima urgencia
+
+- **Media:** Funcionalidades importantes o errores no bloqueantes que deben solucionarse sin máxima prioridad
+
+- **Low:** Tareas a resolver eventualmente
+
+En cuanto a las *responsabilidades*, toda issue debe ser asignada a un único individuo, ya sea en su creación o posteriormente
+
+El *flujo de trabajo* de los issues es:
+
+**Creación ->**
+**Etiquetado y clasificado ->**
+**Asignación ->**
+**Revisión ->**
+**Resolución ->**
+**Cierre**
+
+Como *reglas adicionales*, destacamos:
+
+-Evitar duplicidad de issues
+
+-Las issues deben ser punto central de discusión del equipo
+
+-Una issue podrá ser reabierta si fue cerrada prematuramente
+
+
+*Para profundizar más en la gestión de issues, se debe leer el documento correspondiente*
+
+---
+
+## Gestión de commits
+
+Aquí se describen, a modo de resumen, los apartados mas importantes de la gestión de commits del proyecto.
+
+La estrictura a seguir para un commit será el de *Convencional Commit*:
+
+<tipo>(<area>): <descripción breve>
+
+[opcional]: Cuerpo de mensaje
+
+Los *tipos de commits* son:
+
+- feat: Inclusión de funcionalidades
+- fix: Corrección de errores
+- docs: Cambios en documentación
+- style: Cambios en estilo de código
+- refactor: Cambios en estructura del codigo a mejor
+- test: En relación a pruebas
+- chore: En relación a adición de herramientas, bibliotecas o versionados actualizados
+- perf: Cambios para mejorar el rendimiento
+- build: Cambios que afectan al sistema de construcción o dependencias externas
+- ci: Cambios en los archivos de configuración CI y scripts
+
+Un commit debe ser atómico, conteniendo **un único** cambio significativo, sin combinar múltiples cambios en el mismo, funcionando de manera independiente
+
+En cuanto a su estructura, su cuerpo es *obligatorio*, sirviendo para explicar su mótivo o su funcionalidad. El pie de mensaje es *opcional*, usandose para cerrar issues, referencias documentos o proporcionar detalles especificos
+
+En cuanto a sus buenas prácticas:
+
+- Uso de modo imperativo
+- Descripción breve, clara y concisa (-50 caracteres)
+- Cuerpo breve (-72 caracteres)
+
+Para su *validación, revisión y aprobación*, cada commit sera revisado antes de su integración en otra rama, verificandose lo mencionado anteriormente
+
+El *flujo de trabajo de commits y pull request* es:
+
+**Trabajo en nueva rama ->**
+**Commit atómico ->**
+**Sincronización regular ->**
+**Pull request ->**
+**Revisión ->**
+**Fusión y eliminación de la rama**
+
+Como *reglas adicionales*, destacamos:
+
+- Se deben evitar commits con código incompleto o roto
+  
+- Se deben pasar todas las pruebas locales implementadas antes de subir el commit
+
+- Se evitan mensajes genéricos
+
+- Si el cambio no es trivial, se proporcionará descripción
+
+- Uso de ramas correctas, de la mano con el tipo del commit (feature - feat, fix - fix)
+
+- En la rama main no podrán realizarse commits si no son de tipo docs
+
+
+
+*Para profundizar más en la gestión de commits, se debe leer el documento correspondiente*
+
+
