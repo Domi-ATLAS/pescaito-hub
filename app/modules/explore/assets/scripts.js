@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsNumber = document.getElementById('results_number');
 
     // Initial query fetch on page load or with query parameter
+    sendQuery(); // Llama a sendQuery cuando la página se carga
     queryInput.addEventListener('input', sendQuery);
     new URLSearchParams(window.location.search).get('query')?.trim() && queryInput.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -172,6 +173,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearFilters() {
         queryInput.value = "";
         document.querySelector('#publication_type').value = "any";
+        document.querySelector('#authors').value = "any";
+        document.querySelector('#files').value = "any";
+        document.querySelector('#size').value = "any";
+        document.querySelector('#title').value = "any";
+        document.querySelector('#tag').value = "any";
         document.querySelector('[name="sorting"][value="newest"]').checked = true;
         queryInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
