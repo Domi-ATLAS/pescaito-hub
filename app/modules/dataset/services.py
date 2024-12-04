@@ -139,7 +139,11 @@ class DataSetService(BaseService):
     def get_uvlhub_doi(self, dataset: DataSet) -> str:
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
-
+    
+    def get_profile(self, dataset):
+        user_profile = dataset.user.profile
+        domain = os.getenv('DOMAIN', 'localhost')
+        return f'http://{domain}/profile/{user_profile.user_id}'
 
 class AuthorService(BaseService):
     def __init__(self):

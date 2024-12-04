@@ -8,12 +8,29 @@ from app.modules.profile import profile_bp
 from app.modules.profile.forms import UserProfileForm
 from app.modules.profile.services import UserProfileService
 
-@profile_bp.route('/profile/me')
-@login_required
-def me_profile():
-    user_datasets = current_user.data_sets
-    return render_template('profile/me.html', user_profile=current_user.profile, user=current_user, datasets=user_datasets)
-
+@profile_bp.route("/profile/<int:user_id>", methods=["GET"])
+def view_profile(user_id):
+    # Obtener el perfil del usuario por su ID
+    user_profile = UserProfileService.get_by_id(user_id)
+    
+    # Configuración de la paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    
+    # Obtener los datasets del usuario con paginación
+    datasets_query = db.session.query(DataSet).filter(DataSet.user_id == user_id).order_by(DataSet.created_at.desc())
+    user_datasets_pagination = datasets_query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    # Contar el total de datasets del usuario
+    total_datasets_count = datasets_query.count()
+    
+    return render_template(
+        'profile/profile.html',
+        user_profile=user_profile,
+        datasets=user_datasets_pagination.items,
+        pagination=user_datasets_pagination,
+        total_datasets=total_datasets_count
+    )
 
 @profile_bp.route("/profile/edit", methods=["GET", "POST"])
 @login_required
