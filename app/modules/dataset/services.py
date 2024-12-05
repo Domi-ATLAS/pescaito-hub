@@ -272,7 +272,7 @@ def create_dataset_from_selected_models(models, user):
                 # Suponiendo que los archivos .uvl estén en una carpeta llamada "uv_examples"
                 model_dir = os.path.join('app/modules/dataset/uvl_examples')
                 for file_name in os.listdir(model_dir):
-                    if file_name.endswith('.uvl') and file_name.startswith(f'file{model.id}'):
+                    if file_name == f'file{model.id}.uvl':
                         full_path = os.path.join(model_dir, file_name)
                         zipf.write(full_path, os.path.basename(full_path))
 

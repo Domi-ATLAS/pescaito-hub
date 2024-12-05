@@ -61,7 +61,15 @@ class HubfileService(BaseService):
         # Mover todos los archivos desde el directorio de origen al destino
         for feature_model in dataset.feature_models:
             for hubfile in feature_model.files:
-                shutil.move(os.path.join(source_dir, hubfile.name), dest_dir)
+                source_path = os.path.join(source_dir, hubfile.name)
+                dest_path = os.path.join(dest_dir, hubfile.name)
+
+                if os.path.exists(source_path):
+                    shutil.move(source_path, dest_path)
+                    print(f"Archivo movido: {source_path} -> {dest_path}")
+                else:
+                    print(f"Archivo no encontrado: {source_path}")
+
 
 
 class HubfileDownloadRecordService(BaseService):

@@ -24,7 +24,7 @@ from flask import (
 from flask_login import login_required, current_user
 
 from app.modules.dataset.forms import DataSetForm
-from app.modules.dataset.models import DSDownloadRecord
+from app.modules.dataset.models import DSDownloadRecord, DSMetaData, DataSet, PublicationType
 from app.modules.dataset import dataset_bp
 from app.modules.dataset.services import (
     AuthorService,
@@ -37,6 +37,7 @@ from app.modules.dataset.services import (
     get_cart,
     create_dataset_from_selected_models,
 )
+from app.modules.hubfile.services import HubfileService
 from app.modules.zenodo.services import ZenodoService
 from app.modules.featuremodel.models import FeatureModel
 
@@ -132,6 +133,11 @@ def select_models():
     models = FeatureModel.query.all()  # Obtenemos todos los modelos disponibles
     if request.method == "POST":
         model_ids = request.form.getlist("models")  # Recuperamos los modelos seleccionados
+        
+        if not model_ids:  # Validar que haya al menos un modelo seleccionado
+            flash("Por favor, selecciona al menos un modelo para continuar.", "error")
+            return render_template('dataset/select_models.html', models=models)  # Renderizar con el mensaje
+
         add_to_cart(model_ids)  # Agregar al carrito
         return redirect(url_for('dataset.view_cart'))  # Redirigir al carrito
 
@@ -163,6 +169,55 @@ def create_dataset_from_cart():
         download_name='selected_models.zip',
         mimetype='application/zip'
     )
+
+
+@dataset_bp.route("/cart/move_and_create_dataset", methods=["POST"])
+@login_required
+def move_and_create_dataset():
+    selected_model_ids = get_cart()
+    selected_models = FeatureModel.query.filter(FeatureModel.id.in_(selected_model_ids)).all()
+
+    if not selected_models:
+        return jsonify({"message": "No hay modelos seleccionados para crear el dataset"}), 400
+
+    # Crear el dataset en la base de datos
+    new_dataset = DataSet(
+        user_id=current_user.id,
+        feature_models=selected_models,
+        ds_meta_data=DSMetaData(
+            title=f"Dataset de modelos seleccionados {len(selected_models)}",
+            description="Incluye modelos seleccionados por el usuario.",
+            publication_type=PublicationType.DATA_MANAGEMENT_PLAN
+        )
+    )
+    db.session.add(new_dataset)
+    db.session.commit()
+
+    print(f"Dataset creado: {new_dataset}")
+
+    # Crear el directorio para guardar los archivos
+    dataset_dir = os.path.join(
+        os.getenv('WORKING_DIR', ''),
+        'uploads',
+        f'user_{current_user.id}',
+        f'dataset_{new_dataset.id}'
+    )
+    os.makedirs(dataset_dir, exist_ok=True)
+
+    # Mover los archivos seleccionados al directorio
+    for feature_model in selected_models:
+        for hubfile in feature_model.files:
+            source_path = HubfileService().get_path_by_hubfile(hubfile)  # Ruta original del archivo
+            dest_path = os.path.join(dataset_dir, hubfile.name)
+
+            if os.path.exists(source_path):
+                shutil.copy(source_path, dest_path)
+                print(f"Archivo copiado: {dest_path}")
+            else:
+                print(f"Archivo no encontrado: {source_path}")
+
+    return jsonify({"message": f"Dataset creado y archivos movidos al directorio {dataset_dir}."}), 200
+
 
 
 # **Rutas de archivos**
@@ -314,5 +369,51 @@ def get_unsynchronized_dataset(dataset_id):
     if not dataset:
         abort(404)
 
+    if not dataset.ds_meta_data.tags:
+        dataset.ds_meta_data.tags = "No tags"
+    if not dataset.ds_meta_data.publication_doi:
+        dataset.ds_meta_data.publication_doi = "N/A"
+
     return render_template("dataset/view_dataset.html", dataset=dataset)
+
+@dataset_bp.route('/dataset/unsynchronized/download/<int:dataset_id>', methods=['GET'])
+@login_required
+def download_unsynchronized_dataset(dataset_id):
+    # Obtener el dataset correspondiente
+    dataset = DataSet.query.filter_by(id=dataset_id, user_id=current_user.id).first()
+    if not dataset:
+        return jsonify({"error": "Dataset no encontrado o acceso no autorizado."}), 404
+
+    # Crear un archivo ZIP temporal
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, f"dataset_{dataset.id}.zip")
+
+    try:
+        with ZipFile(zip_path, 'w') as zipf:
+            # Iterar sobre los FeatureModels y sus Hubfiles asociados
+            for feature_model in dataset.feature_models:
+                for hubfile in feature_model.files:
+                    # Obtener la ruta del archivo desde el servicio HubfileService
+                    source_path = HubfileService().get_path_by_hubfile(hubfile)
+
+                    if os.path.exists(source_path):
+                        # Agregar el archivo al ZIP
+                        zipf.write(source_path, os.path.basename(source_path))
+                        print(f"Archivo añadido al ZIP: {source_path}")
+                    else:
+                        print(f"Archivo no encontrado: {source_path}")
+
+        # Enviar el archivo ZIP al cliente
+        return send_file(
+            zip_path,
+            as_attachment=True,
+            download_name=f'dataset_{dataset.id}.zip',
+            mimetype='application/zip'
+        )
+    except Exception as e:
+        print(f"Error al generar el ZIP: {e}")
+        return jsonify({"error": "Error al generar el ZIP del dataset."}), 500
+    finally:
+        # Limpiar el directorio temporal
+        shutil.rmtree(temp_dir)
 

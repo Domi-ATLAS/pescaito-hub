@@ -15,13 +15,24 @@
                     </div>
                 {% endfor %}
             </div>
-            <button type="submit" class="btn btn-primary mt-3">Add to Cart</button>
+            <button type="submit" class="btn btn-primary mt-3" id="add-to-cart-btn">Add to Cart</button>
         </form>
     </div>
 
 {% endblock %}
 
 {% block scripts %}
+        <script>
+            console.log("Script cargado correctamente");
+
+            document.getElementById("add-to-cart-btn").addEventListener("click", function (event) {
+                const checkboxes = document.querySelectorAll('input[name="models"]:checked');
+                if (checkboxes.length === 0) {
+                    event.preventDefault();
+                    alert("Por favor, selecciona al menos un modelo antes de continuar.");
+                }
+            });
+        </script>
         <script src="{{ url_for('zenodo.scripts') }}"></script>
         <script src="{{ url_for('dataset.scripts') }}"></script>
 {% endblock %}
