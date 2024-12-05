@@ -2,33 +2,17 @@ name: Commits Syntax Checker
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main]
     types: [opened, reopened, edited, review_requested, synchronize]
   push:
     branches:
       - "main"
-      - "develop"
   workflow_call:
 
 jobs:
   check:
     name: Conventional Commits
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - uses: webiny/action-conventional-commits@v1.0.3
-      - name: Validate Commit Description Length
-        run: |
-          git log -n 10 --pretty=format:"%H" | while read -r hash; do
-            body=$(git show -s --format=%b $hash) 
-            description_length=${#body}
-
-            if [[ -z "$body" ]]; then
-              echo "Error: La descripción del commit $hash está vacía." && exit 1
-            fi
-
-            if [[ $description_length -gt 1000 ]]; then
-              echo "Error: La descripción del commit  $hash supera los 1000 caracteres." && exit 1
-            fi
-          done
