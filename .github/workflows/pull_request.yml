@@ -11,10 +11,12 @@ jobs:
 
     steps:
       - name: Validar descripción de la Pull Request
+        shell: bash  
         run: |
           
+          titulo="${{ github.event.pull_request.title }}"
           descripcion="${{ github.event.pull_request.body }}"
-          
+
           
           if [[ -z "$descripcion" ]]; then
             echo "Error: La descripción de la Pull Request está vacía." && exit 1
@@ -27,11 +29,11 @@ jobs:
           fi
 
           
-          if [[ ! "${{ github.event.pull_request.title }}" =~ ^(feat|fix|docs|style|refactor|test|chore|perf|build|ci)\([a-zA-Z0-9 _-]+\):\ .+ ]]; then
+          if [[ ! "$titulo" =~ ^(feat|fix|docs|style|refactor|test|chore|perf|build|ci)\([a-zA-Z0-9 _-]+\):\ .+ ]]; then
             echo "Error: El título de la Pull Request no sigue el formato esperado."
             echo "Formato esperado: <tipo>(<módulo>): <descripción>"
             echo "Ejemplo válido: fix(workflows): Corrección en el pipeline de CI"
-            echo "Título actual: '${{ github.event.pull_request.title }}'"
+            echo "Título actual: '$titulo'"
             exit 1
           fi
 
