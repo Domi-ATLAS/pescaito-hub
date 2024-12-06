@@ -1,4 +1,4 @@
-name: Run tests
+name: Run tests in paralell
 
 on:
   push:
@@ -47,4 +47,13 @@ jobs:
         MARIADB_USER: uvlhub_user
         MARIADB_PASSWORD: uvlhub_password
       run: |
-        pytest app/modules/ --ignore-glob='*selenium*'
+        pytest -n auto app/modules/ --ignore-glob='*selenium*'
+
+    - name: Save Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: pytest-results
+        path: .pytest_cache/
+
+
