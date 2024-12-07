@@ -33,7 +33,7 @@ Es la rama principal del proyecto. Debe reflejar siempre el código estable y li
 Esta rama se utiliza como punto de integración para todas las funcionalidades completadas. Representa el código que está preparado para ser testeado y, eventualmente, lanzado a producción.
 
 **Reglas:**
-- Los features, fixes y otros trabajos deben ser fusionados aquí tras su revisión.
+- Los features, fixes y otros trabajos deben ser fusionados aquí tras su revisión. Siendo los fixes trabajados desde la propia rama sin crear otra nueva.
 - Todo código fusionado en esta rama debe pasar pruebas automáticas (si las hay).
 
 ---
@@ -53,57 +53,14 @@ Cada nueva funcionalidad o tarea debe desarrollarse en una rama separada creada 
 
 ---
 
-### 4. Ramas de Corrección de Errores (`fix/<nombre-descriptivo>` o `bugfix/<nombre-descriptivo>`)
-
-**Descripción:**  
-Utilizadas para corregir errores específicos.
-
-**Reglas:**
-- El nombre de la rama debe seguir el patrón: `fix/<nombre-descriptivo>` o `bugfix/<nombre-descriptivo>`.  
-  Ejemplo: `fix/error-login`.
-- Se crean desde `develop` si es una corrección en desarrollo, o desde `main` si es una corrección crítica de producción.
-- Las correcciones de errores menores se fusionarán en `develop`, mientras que las correcciones críticas en producción deben fusionarse en `main` mediante un hotfix (ver más abajo).
-
----
-
-### 5. Ramas de Lanzamientos (`release/<número-versión>`)
-
-**Descripción:**  
-Se usan para preparar una nueva versión de producción. Permiten a los desarrolladores realizar correcciones menores y pulir detalles antes de lanzar la versión final.
-
-**Reglas:**
-- El nombre de la rama debe seguir el patrón: `release/<número-versión>`.  
-  Ejemplo: `release/1.0.0`.
-- Se crean desde `develop` cuando se considera que una versión está lista para su lanzamiento.
-- Se pueden aplicar cambios menores, como ajustes de versión, pero no deben incluirse nuevas funcionalidades.
-- Una vez que los cambios son aprobados, la rama `release` debe fusionarse tanto en `main` (para lanzar la versión) como en `develop` (para que el código de la versión esté disponible en futuras iteraciones).
-- La rama se elimina después de su fusión.
-
----
-
-### 6. Ramas de Hotfix (`hotfix/<nombre-descriptivo>`)
-
-**Descripción:**  
-Para correcciones urgentes en el código de producción.
-
-**Reglas:**
-- El nombre de la rama debe seguir el patrón: `hotfix/<nombre-descriptivo>`.  
-  Ejemplo: `hotfix/solucion-error-produccion`.
-- Se crean desde `main` y, una vez corregido el error, se fusionan de vuelta en `main` y en `develop` (para que la corrección se propague a las siguientes versiones).
-- Se debe realizar un pull request para su fusión, con revisión rápida por parte del equipo.
-- Estas ramas se eliminan tras su fusión.
-
----
-
 ## Flujo de Trabajo General
 
 El equipo seguirá un flujo de trabajo basado en **Git Flow** y **GitHub Flow**, adaptado a las necesidades del proyecto. Este es un esquema básico del flujo:
 
 1. **Nueva funcionalidad:** Crear una rama `feature/` desde `develop`, desarrollar y realizar un pull request.
-2. **Corrección de errores:** Crear una rama `fix/` o `hotfix/`, dependiendo de si el error es en desarrollo o en producción.
-3. **Preparación para lanzamiento:** Crear una rama `release/` desde `develop`.
-4. **Lanzamiento:** Fusionar la rama `release/` en `main` para generar una nueva versión.
-5. **Hotfix:** Para errores críticos en producción, crear una rama `hotfix/` desde `main` y fusionar tanto en `main` como en `develop`.
+2. **Corrección de errores:** Seguir trabajando en la misma rama del error pero con los commits, de formato "fix", dependiendo de si el error es en desarrollo o en producción.
+3. **Preparación para lanzamiento:** Desde la rama `main/` una vez se haya fusionado todo `develop`, de forma que esta todo estable sin problemas entre ramas, se lanzara y desplegara la aplicación.
+4. **Lanzamiento:** Como hemos comentado usamos `main` para generar una nueva versión.
 
 ---
 
