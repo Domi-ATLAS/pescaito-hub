@@ -18,7 +18,7 @@ El uso de commits atómicos y el seguimiento de las convenciones de **Convention
 
 Cada commit debe seguir el formato **Conventional Commits** y también mantener la atomicidad, utilizando la siguiente estructura:
 
-<tipo>(<área>): <descripción breve>
+tipo(<área>): <descripción breve>
 
 [opcional] cuerpo del mensaje
 [opcional] pie de mensaje
@@ -136,4 +136,4 @@ Para validar que la convención de commits es correcta:
   Asegúrate de hacer commits en la rama correcta según la naturaleza del cambio (por ejemplo, ramas `feature/` para nuevas funcionalidades, `fix/` para correcciones).
 
 - **Política de Protección de la Rama `main`:**  
-  La rama `main` debe estar protegida para que no se puedan hacer commits directos. Los cambios deben realizarse mediante pull requests revisados por otro miembro del equipo. Excepto cambios para documentos, o cambios generales necesarios.
+  La rama `main` debe estar protegida para que no se puedan hacer commits directos. Los cambios deben realizarse mediante pull requests revisados por otro miembro del equipo. Excepto cambios para documentos, o cambios generales necesarios. A no ser que sean commits directos del tipo docs, en ese caso, estan permitidos.
