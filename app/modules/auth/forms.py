@@ -20,3 +20,6 @@ class LoginForm(FlaskForm):
 
 class PasswordRecoveryForm(FlaskForm):
     email = StringField('Email', validators=[Email()])
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired()])

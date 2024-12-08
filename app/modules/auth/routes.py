@@ -88,7 +88,7 @@ from flask_login import current_user, login_user, logout_user
 from app import mail  # Importar mail aquí, donde lo necesitamos
 
 from app.modules.auth import auth_bp
-from app.modules.auth.forms import SignupForm, LoginForm, PasswordRecoveryForm
+from app.modules.auth.forms import SignupForm, LoginForm, PasswordRecoveryForm, ResetPasswordForm  
 from app.modules.auth.services import AuthenticationService
 from app.modules.profile.services import UserProfileService
 from flask_mail import Message  # Para enviar el correo
@@ -132,6 +132,7 @@ def recover_password():
 # Función para verificar el token
 from werkzeug.security import generate_password_hash
 
+
 @auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     email = verify_reset_token(token)
@@ -144,15 +145,14 @@ def reset_password(token):
         flash('Usuario no encontrado', 'error')
         return redirect(url_for('auth.recover_password'))
 
-    if request.method == 'POST':
-        new_password = request.form['password']
-        if not new_password:
-            flash('La contraseña no puede estar vacía.', 'error')
-            return render_template('auth/reset_password.html', token=token)
+    # Crear una instancia del formulario
+    form = ResetPasswordForm()
 
+    if form.validate_on_submit():  # Validación de formulario usando Flask-WTF
+        new_password = form.password.data
         user.password = generate_password_hash(new_password)  # Encripta la contraseña
         db.session.commit()
         flash('Tu contraseña ha sido actualizada exitosamente.', 'success')
         return redirect(url_for('auth.login'))
 
-    return render_template('auth/reset_password.html', token=token)
+    return render_template('auth/reset_password.html', form=form, token=token)
