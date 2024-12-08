@@ -233,9 +233,13 @@
                         </span>
                     </div>
                     <div class="col-md-8 col-12">
-                        {% for tag in dataset.ds_meta_data.tags.split(',') %}
-                        <span class="badge bg-secondary">{{ tag.strip() }}</span>
-                        {% endfor %}
+                        {% if dataset.ds_meta_data.tags %}
+                            {% for tag in dataset.ds_meta_data.tags.split(',') %}
+                                <span class="badge bg-secondary">{{ tag.strip() }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <p>No hay tags disponibles</p>
+                        {% endif %}
                     </div>
 
                 </div>

@@ -2,11 +2,16 @@ import logging
 import os
 import hashlib
 import shutil
+import tempfile
 from typing import Optional
 import uuid
+from zipfile import ZipFile
+from app.modules.hubfile.services import HubfileService
 
 from flask import request
+from app import db  
 from flask_login import current_user
+
 
 from app import db
 from app.modules.auth.services import AuthenticationService
@@ -26,9 +31,9 @@ from app.modules.hubfile.repositories import (
     HubfileViewRecordRepository
 )
 from core.services.BaseService import BaseService
+from flask import session
 
 logger = logging.getLogger(__name__)
-
 
 def calculate_checksum_and_size(file_path):
     file_size = os.path.getsize(file_path)
@@ -248,3 +253,68 @@ class SizeService():
             return f'{round(size / (1024 ** 2), 2)} MB'
         else:
             return f'{round(size / (1024 ** 3), 2)} GB'
+
+
+# Funciones para gestionar la selección de modelos en el carrito
+def add_to_cart(model_ids):
+    """
+    Función para agregar modelos seleccionados al carrito (sesión).
+    """
+    if 'selected_models' not in session:
+        session['selected_models'] = []
+
+    # Agregar modelos al carrito (evitar duplicados)
+    session['selected_models'].extend(model_id for model_id in model_ids if model_id not in session['selected_models'])
+    session.modified = True
+
+def get_cart():
+    """
+    Recupera los modelos seleccionados en el carrito.
+    """
+    return session.get('selected_models', [])
+
+def create_dataset_from_selected_models(models, user):
+    """
+    Crea un nuevo dataset a partir de los modelos seleccionados por el usuario.
+    """
+    try:
+        # Crea un nuevo objeto DSMetaData con los valores necesarios
+        ds_meta_data = DSMetaData(
+            title=f"Dataset de modelos seleccionados {len(models)}",
+            description="Incluye modelos de características seleccionados por el usuario.",
+            publication_type="DATA_MANAGEMENT_PLAN",  # Valor ajustado para coincidir con el enum
+            publication_doi=None
+        )
+        db.session.add(ds_meta_data)
+        db.session.commit()
+
+        # Crear un nuevo objeto DataSet con un ds_meta_data_id válido
+        dataset = DataSet(user_id=user.id, ds_meta_data_id=ds_meta_data.id)
+        db.session.add(dataset)
+        db.session.commit()
+
+        # Asociar los modelos seleccionados con el dataset
+        for model in models:
+            dataset.feature_models.append(model)
+
+        # Confirmar los cambios
+        db.session.commit()
+
+        # Crear un archivo ZIP con los modelos seleccionados
+        temp_dir = tempfile.mkdtemp()
+        zip_path = os.path.join(temp_dir, f'dataset_{dataset.id}.zip')
+
+        with ZipFile(zip_path, 'w') as zipf:
+            for model in models:
+                # Suponiendo que los archivos .uvl estén en una carpeta llamada "uv_examples"
+                model_dir = os.path.join('app/modules/dataset/uvl_examples')
+                for file_name in os.listdir(model_dir):
+                    if file_name == f'file{model.id}.uvl':
+                        full_path = os.path.join(model_dir, file_name)
+                        zipf.write(full_path, os.path.basename(full_path))
+
+        return zip_path  # Retornar la ruta al archivo ZIP creado
+    except Exception as exc:
+        logger.error(f"Error al crear el dataset a partir de los modelos seleccionados: {exc}")
+        db.session.rollback()
+        raise exc
