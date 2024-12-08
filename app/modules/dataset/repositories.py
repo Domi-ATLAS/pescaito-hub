@@ -68,6 +68,14 @@ class DataSetRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
+    def get_by_id(self, dataset_id: int) -> Optional[DataSet]:
+        return self.model.query.filter_by(id=dataset_id).first()
+
+    def update(self, dataset: DataSet): 
+        updated_dataset =self.session.merge(dataset)
+        self.session.commit()
+        return updated_dataset
+
     def get_synchronized(self, current_user_id: int) -> DataSet:
         return (
             self.model.query.join(DSMetaData)

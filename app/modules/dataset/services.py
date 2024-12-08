@@ -10,9 +10,12 @@ from app.modules.hubfile.services import HubfileService
 
 from flask import request
 from app import db  
+from flask_login import current_user
 
+
+from app import db
 from app.modules.auth.services import AuthenticationService
-from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
+from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData, Rate
 from app.modules.dataset.repositories import (
     AuthorRepository,
     DOIMappingRepository,
@@ -53,6 +56,8 @@ class DataSetService(BaseService):
         self.dsviewrecord_repostory = DSViewRecordRepository()
         self.hubfileviewrecord_repository = HubfileViewRecordRepository()
 
+    
+
     def move_feature_models(self, dataset: DataSet):
         current_user = AuthenticationService().get_authenticated_user()
         source_dir = current_user.temp_folder()
@@ -65,6 +70,38 @@ class DataSetService(BaseService):
         for feature_model in dataset.feature_models:
             uvl_filename = feature_model.fm_meta_data.uvl_filename
             shutil.move(os.path.join(source_dir, uvl_filename), dest_dir)
+
+    def get_dataset_by_id(self, dataset_id: int) -> Optional[DataSet]:
+        dataset = self.repository.get_by_id(dataset_id)
+        if not dataset:
+            raise ValueError(f"Dataset con id {dataset_id} no encontrado.")
+        return dataset
+
+    def update_rating(self, dataset_id: int, rating: int) -> DataSet:
+        dataset = self.get_dataset_by_id(dataset_id)
+
+        existing_rate = db.session.query(Rate).filter_by(user_id=current_user.id, dataset_id=dataset_id).first()
+        if existing_rate:
+            raise ValueError("El usuario ya ha calificado este dataset.")
+
+        if dataset.totalRatings is None:
+            dataset.totalRatings = 0
+        if dataset.numRatings is None:
+            dataset.numRatings = 0
+
+        new_rate = Rate(rating=rating, dataset_id=dataset.id, user_id=current_user.id)
+
+        db.session.add(new_rate)
+        db.session.commit()
+
+        dataset.totalRatings += rating
+        dataset.numRatings += 1
+        dataset.avgRating = dataset.totalRatings / dataset.numRatings
+
+        self.repository.update(dataset)
+        
+        return dataset
+        
 
     def get_synchronized(self, current_user_id: int) -> DataSet:
         return self.repository.get_synchronized(current_user_id)
