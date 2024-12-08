@@ -36,11 +36,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Check for outdated dependencies
-      run: |
-        pip list --outdated
-   
+ 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
