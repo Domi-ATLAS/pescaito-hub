@@ -156,3 +156,28 @@ def reset_password(token):
         return redirect(url_for('auth.login'))
 
     return render_template('auth/reset_password.html', form=form, token=token)
+
+@auth_bp.route('/reset-password-static', methods=['GET', 'POST'])
+def reset_password_static():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        new_password = request.form.get('new_password')
+
+        if not email or not new_password:
+            flash('Both email and password are required.', 'error')
+            return render_template('auth/reset_password_static.html')
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash('No user found with that email.', 'error')
+            return render_template('auth/reset_password_static.html')
+
+        try:
+            user.password = generate_password_hash(new_password)  # Encripta la nueva contraseña
+            db.session.commit()
+            flash('Password updated successfully.', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            flash(f'Error updating password: {e}', 'error')
+
+    return render_template('auth/reset_password_static.html')

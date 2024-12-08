@@ -4,7 +4,7 @@ from flask import url_for
 from app.modules.auth.services import AuthenticationService
 from app.modules.auth.repositories import UserRepository
 from app.modules.profile.repositories import UserProfileRepository
-
+from app.modules.auth.routes import generate_reset_token, verify_reset_token, send_reset_email
 
 @pytest.fixture(scope="module")
 def test_client(test_client):
@@ -117,3 +117,45 @@ def test_service_create_with_profile_fail_no_password(clean_database):
 
     assert UserRepository().count() == 0
     assert UserProfileRepository().count() == 0
+
+
+def test_generate_reset_token():
+    email = "test@example.com"
+    token = generate_reset_token(email)
+    assert token is not None
+
+def test_verify_reset_token():
+    email = "test@example.com"
+    token = generate_reset_token(email)
+    verified_email = verify_reset_token(token)
+    assert verified_email == email
+
+def test_send_reset_email(test_client):
+    email = "test@example.com"
+    with test_client.application.app_context():
+        send_reset_email(email)
+
+def test_recover_password_route(test_client):
+    response = test_client.post(
+        "/recover_password",
+        data=dict(email="test@example.com"),
+        follow_redirects=True
+    )
+    assert response.status_code == 200
+    assert b"Remember your password" in response.data
+
+# def test_reset_password_route(test_client):
+#     email = "test@example.com"
+#     new_password = "newpassword"
+#     with test_client.application.app_context():
+#         user = User(email=email, password="oldpassword")
+#         db.session.add(user)
+#         db.session.commit()
+#         token = generate_reset_token(email)
+#         response = test_client.post(
+#         f"/reset_password/{token}",
+#         data=dict(password=new_password, confirm=new_password),
+#         follow_redirects=True
+#         )
+#     assert response.status_code == 200
+#     assert b"Reset your password" in response.data
