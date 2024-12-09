@@ -1,72 +1,72 @@
 import time
+import unittest
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from core.environment.host import get_host_for_selenium_testing
-from core.selenium.common import initialize_driver, close_driver
+
+class TestExplorePage(unittest.TestCase):
+
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+        self.driver.get("http://127.0.0.1:5000/explore")  # Afrom selenium.webdriver.support.ui import Selectjusta la URL según sea necesario
+        self.wait = WebDriverWait(self.driver, 10)
 
 
-def wait_for_page_to_load(driver, timeout=1000):
-    """Waits for the page to fully load."""
-    WebDriverWait(driver, timeout).until(
-        lambda driver: driver.execute_script("return document.readyState") == "complete"
-    )
+    def tearDown(self):
+        self.driver.quit()
+
+    def clear_filters(self):
+        clear_button = self.driver.find_element(By.ID, 'clear-filters')
+        self.driver.execute_script("arguments[0].scrollIntoView();", clear_button)
+        self.wait.until(EC.element_to_be_clickable((By.ID, 'clear-filters')))
+        self.driver.execute_script("arguments[0].click();", clear_button)
+        time.sleep(1)  # Allow time for the page to reset
+
+    def test_query_by_title_or_author_finds(self):
+        # Verifica que la funcionalidad de búsqueda funciona correctamente
+        query_input = self.driver.find_element(By.ID, 'query')
+        query_input.send_keys('title:"Sample dataset 3" || author:"Author 2"')
+        query_input.send_keys(Keys.RETURN)
+        time.sleep(2)
+
+        results = self.driver.find_element(By.ID, 'results')
+        self.assertGreater(len(results.find_elements(By.CLASS_NAME, 'card')), 0, "No se encontraron resultados")
+        self.clear_filters()
+        print("Encontrar por titulo o autor: OK")
+                
+
+    def test_query_by_title_and_author_finds(self):
+        # Verifica que la funcionalidad de búsqueda funciona correctamente
+        query_input = self.driver.find_element(By.ID, 'query')
+        query_input.send_keys('title:"Sample dataset 2" && author:"Author 2"')
+        query_input.send_keys(Keys.RETURN)
+        time.sleep(2)
+
+        results = self.driver.find_element(By.ID, 'results')
+        self.assertGreater(len(results.find_elements(By.CLASS_NAME, 'card')), 0, "No se encontraron resultados")
+        self.clear_filters()
+        print("Encontrar por titulo y autor: OK")
 
 
-def test_search_functionality():
-    """Tests the search functionality on the explore page."""
-    driver = initialize_driver()
-    try:
-        host = get_host_for_selenium_testing()
+    def test_query_by_author_finds(self):
+        pass
 
-        # Log in
-        driver.get(f"{host}/login")
-        wait_for_page_to_load(driver)
-        email_field = driver.find_element(By.NAME, "email")
-        password_field = driver.find_element(By.NAME, "password")
-        email_field.send_keys("user1@example.com")
-        password_field.send_keys("1234")
-        password_field.send_keys(Keys.RETURN)
-        wait_for_page_to_load(driver)
+    def test_query_by_title_no_finds(self):
+        pass
 
-        # Navigate to the Explore page
-        driver.get(f"{host}/explore")
-        wait_for_page_to_load(driver)
+    def test_query_by_description_no_finds(self):
+        pass
 
-        # Input search parameters
-        query_field = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, "query"))
-        )
-        query_field.clear()
-        query_field.send_keys('title:"Sample dataset 2"')
+    def test_query_by_description_no_finds(self):
+        pass
 
-        # Submit the search form
-        wait_for_page_to_load(driver)
+    def test_mixed_query_finds(self):
+        pass
 
-        # Validate the results
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "results"))
-        )
-        results_container = driver.find_element(By.ID, "results")
-        results = results_container.find_elements(By.CLASS_NAME, "card")
-        
-        assert len(results) > 0, "No search results found!"
+    def test_mixed_query_no_finds(self):
+        pass
 
-        # Output results for debugging
-        for result in results:
-            title = result.find_element(By.TAG_NAME, "h3").text
-            print(f"Found dataset: {title}")
-
-        print("Search functionality test passed!")
-
-    except Exception as e:
-        print(f"Test failed due to error: {e}")
-    finally:
-        # Close the browser
-        close_driver(driver)
-
-
-# Run the test
 if __name__ == "__main__":
-    test_search_functionality()
+    unittest.main()
