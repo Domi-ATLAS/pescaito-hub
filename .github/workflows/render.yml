@@ -47,6 +47,7 @@ jobs:
         MARIADB_PORT: 3306
         MARIADB_TEST_DATABASE: uvlhubdb_test
         MARIADB_USER: uvlhubdb_user
+
         MARIADB_PASSWORD: uvlhub_password
       run: |
         pytest app/modules/ --ignore-glob='*selenium*'
