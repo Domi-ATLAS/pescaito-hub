@@ -76,6 +76,11 @@ class DataSetService(BaseService):
         dataset = self.get_dataset_by_id(dataset_id)
 
         existing_rate = db.session.query(Rate).filter_by(user_id=current_user.id, dataset_id=dataset_id).first()
+
+        if rating < 1 or rating > 5:
+            raise ValueError("El valor del rating debe estar entre 1 y 5.")
+
+
         if existing_rate:
             raise ValueError("El usuario ya ha calificado este dataset.")
 

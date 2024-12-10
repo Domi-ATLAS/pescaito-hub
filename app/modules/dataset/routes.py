@@ -48,9 +48,6 @@ ds_view_record_service = DSViewRecordService()
 @login_required
 def update_rating(dataset_id, rating):    
     try:
-        if rating < 1 or rating > 5:
-            raise ValueError("El valor del rating debe estar entre 1 y 5.")
-
         updated_dataset = dataset_service.update_rating(dataset_id, rating)
         return jsonify({"message": "Rating updated successfully"})
     except Exception as e:
