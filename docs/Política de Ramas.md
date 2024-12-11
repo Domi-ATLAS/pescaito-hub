@@ -53,6 +53,21 @@ Cada nueva funcionalidad o tarea debe desarrollarse en una rama separada creada 
 
 ---
 
+### 4. Ramas de Lanzamiento (`release/<nombre-descriptivo>`)
+
+**Descripción:**  
+Cada vez que se vaya a crear una release, es decir, una PR de develop a main, se creara automaticamente con un workflow que generara la rama.
+
+**Reglas:**
+- El nombre de la rama debe seguir el patrón: `release/X.Y.Z` donde X es un numero indicativo de una version muy significativa y asi en descenso con Y y Z.  
+  Ejemplo: `release/1.2.0`.
+- Las ramas de release se crean desde `main`.
+- Cada rama debe ser desplegada para ser una aplicación funcional.
+- El proceso debe ser revisado siempre, comparando main con release.
+
+---
+
+
 ## Flujo de Trabajo General
 
 El equipo seguirá un flujo de trabajo basado en **Git Flow** y **GitHub Flow**, adaptado a las necesidades del proyecto. Este es un esquema básico del flujo:
