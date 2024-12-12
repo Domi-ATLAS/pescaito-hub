@@ -1,0 +1,35 @@
+{% extends "base_template.html" %}
+
+{% block title %}View Cart{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>Your Selected Feature Models</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in models %}
+                <tr>
+                    <td>{{ model.fm_meta_data.title }}</td>
+                    <td>{{ model.fm_meta_data.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Botón para crear el dataset -->
+        <form method="POST" action="{{ url_for('dataset.create_dataset_from_cart') }}">
+            <button type="submit" class="btn btn-success mt-3">Create Dataset</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+        <script src="{{ url_for('zenodo.scripts') }}"></script>
+        <script src="{{ url_for('dataset.scripts') }}"></script>
+{% endblock %}

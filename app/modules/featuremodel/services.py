@@ -16,6 +16,12 @@ class FeatureModelService(BaseService):
 
     def count_feature_models(self):
         return self.repository.count_feature_models()
+    
+    def get_all_feature_models(self):
+        """
+        Retorna todos los FeatureModel disponibles para la selección.
+        """
+        return self.repository.get_all()  # Método genérico de BaseService que devuelve todos los objetos
 
     class FMMetaDataService(BaseService):
         def __init__(self):

@@ -1,13 +1,18 @@
-name: Run tests in paralell
+name: Deploy to Render
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
 
 jobs:
-  pytest:
+
+  testing:
+
+    name: Run Tests
     runs-on: ubuntu-latest
 
     services:
@@ -23,15 +28,12 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+
     - uses: actions/checkout@v4
 
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-
-    - name: Prepare environment
-      run: |
-        sed -i '/rosemary @ file:\/\/\/app/d' requirements.txt
 
     - name: Install dependencies
       run: |
@@ -44,16 +46,22 @@ jobs:
         MARIADB_HOSTNAME: 127.0.0.1
         MARIADB_PORT: 3306
         MARIADB_TEST_DATABASE: uvlhubdb_test
-        MARIADB_USER: uvlhub_user
+        MARIADB_USER: uvlhubdb_user
+
         MARIADB_PASSWORD: uvlhub_password
       run: |
-        pytest -n auto app/modules/ --ignore-glob='*selenium*'
+        pytest app/modules/ --ignore-glob='*selenium*'
 
-    - name: Save Test Results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: pytest-results
-        path: .pytest_cache/
+  deploy:
+    name: Deploy to Render
+    needs: testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-
+      - name: Deploy to Render
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"

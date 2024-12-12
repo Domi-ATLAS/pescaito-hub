@@ -38,6 +38,14 @@
 
                         </div>
 
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <p class="text-muted">
+                                    Valoración promedio: <strong>{{ dataset.avgRating }}</strong> ★
+                                </p>
+                            </div>
+                        </div>
+
                         <div class="row mb-2 mt-4">
 
                             <div class="col-12">
@@ -61,13 +69,13 @@
 
                             <div class="col-12">
                                 <a href="{{ dataset.get_uvlhub_doi() }}">{{ dataset.get_uvlhub_doi() }}</a>
-                                 <div id="dataset_doi_uvlhub_{{ dataset.id }}" style="display: none">
-                                {{ dataset.get_uvlhub_doi() }}
-                            </div>
+                                <div id="dataset_doi_uvlhub_{{ dataset.id }}" style="display: none">
+                                    {{ dataset.get_uvlhub_doi() }}
+                                </div>
 
-                            <i data-feather="clipboard" class="center-button-icon"
-                               style="cursor: pointer"
-                               onclick="copyText('dataset_doi_uvlhub_{{ dataset.id }}')"></i>
+                                <i data-feather="clipboard" class="center-button-icon"
+                                   style="cursor: pointer"
+                                   onclick="copyText('dataset_doi_uvlhub_{{ dataset.id }}')"></i>
                             </div>
 
 
