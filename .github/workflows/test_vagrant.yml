@@ -1,0 +1,46 @@
+name: Vagrant Setup Workflow
+
+on:
+  push:
+    branches: [main, develop, feature/vagrant]
+  pull_request:
+    branches: [main, develop, feature/vagrant]
+
+jobs:
+  vagrant-setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Vagrant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y vagrant virtualbox ansible
+
+      - name: Validate Vagrantfile
+        run: vagrant validate
+
+      - name: Start Vagrant Environment
+        run: |
+          vagrant up
+
+      - name: Run Ansible Playbooks
+        run: |
+          ansible-playbook 00_main.yml
+          ansible-playbook 01_setup.yml
+          ansible-playbook 02_install_mariadb.yml
+          ansible-playbook 03_mariadb_scripts.yml
+          ansible-playbook 04_install_dependencies.yml
+          ansible-playbook 05_run_app.yml
+          ansible-playbook 06_utilities.yml
+
+      - name: Test Environment
+        run: |
+          vagrant ssh -c "echo 'Vagrant environment is up and running'"
+
+      - name: Destroy Vagrant Environment
+        if: always()
+        run: |
+          vagrant destroy -f
