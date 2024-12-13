@@ -1,5 +1,4 @@
 name: Vagrant Setup Workflow
-
 on:
   push:
     branches: [main, develop, feature/vagrant]
@@ -13,23 +12,28 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Initialize Vagrant
+    - name: Navigate to /vagrant Directory
+      working-directory: ./vagrant
       run: |
-        vagrant init ubuntu/bionic64
+        pwd
 
     - name: Validate Vagrant Configuration
+      working-directory: ./vagrant
       run: |
         vagrant validate
 
     - name: Start Vagrant Machine
+      working-directory: ./vagrant
       run: |
         vagrant up
 
     - name: Run Provisioning
+      working-directory: ./vagrant
       run: |
         vagrant provision
 
     - name: Destroy VM (optional for cleanup)
       if: always()
+      working-directory: ./vagrant
       run: |
         vagrant destroy -f
