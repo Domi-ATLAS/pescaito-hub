@@ -1,0 +1,35 @@
+name: Vagrant Setup Workflow
+
+on:
+  push:
+    branches: [main, develop, feature/vagrant]
+  pull_request:
+    branches: [main, develop, feature/vagrant]
+
+jobs:
+  vagrant-deploy:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Initialize Vagrant
+      run: |
+        vagrant init ubuntu/bionic64
+
+    - name: Validate Vagrant Configuration
+      run: |
+        vagrant validate
+
+    - name: Start Vagrant Machine
+      run: |
+        vagrant up
+
+    - name: Run Provisioning
+      run: |
+        vagrant provision
+
+    - name: Destroy VM (optional for cleanup)
+      if: always()
+      run: |
+        vagrant destroy -f
