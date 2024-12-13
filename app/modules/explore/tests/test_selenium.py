@@ -22,7 +22,7 @@ class TestExplorePage(unittest.TestCase):
         self.driver.execute_script("arguments[0].scrollIntoView();", clear_button)
         self.wait.until(EC.element_to_be_clickable((By.ID, 'clear-filters')))
         self.driver.execute_script("arguments[0].click();", clear_button)
-        time.sleep(1)  # Allow time for the page to reset
+        time.sleep(1)
 
     def test_query_by_title_or_author_finds(self):
         # Verifica que la funcionalidad de búsqueda funciona correctamente
@@ -50,22 +50,26 @@ class TestExplorePage(unittest.TestCase):
         print("Encontrar por titulo y autor: OK")
 
 
-    def test_query_by_author_finds(self):
+    def test_query_by_description_finds(self):
+        # Verifica que la funcionalidad de búsqueda funciona correctamente
+        query_input = self.driver.find_element(By.ID, 'query')
+        query_input.send_keys('description:"Description for dataset 4"')
+        query_input.send_keys(Keys.RETURN)
+        time.sleep(2)
+
+        results = self.driver.find_element(By.ID, 'results')
+        self.assertGreater(len(results.find_elements(By.CLASS_NAME, 'card')), 0, "No se encontraron resultados")
+        self.clear_filters()
+        print("Encontrar por descripción exacta: OK")
+
+    def test_query_by_title_or_author_no_finds(self):
+
         pass
 
-    def test_query_by_title_no_finds(self):
+    def test_query_by_title_and_author_finds(self):
         pass
 
     def test_query_by_description_no_finds(self):
-        pass
-
-    def test_query_by_description_no_finds(self):
-        pass
-
-    def test_mixed_query_finds(self):
-        pass
-
-    def test_mixed_query_no_finds(self):
         pass
 
 if __name__ == "__main__":
