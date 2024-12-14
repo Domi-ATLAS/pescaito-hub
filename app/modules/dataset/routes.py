@@ -57,7 +57,7 @@ ds_view_record_service = DSViewRecordService()
 def update_rating(dataset_id, rating):    
     try:
         updated_dataset = dataset_service.update_rating(dataset_id, rating)
-        return jsonify({"message": "Rating updated successfully"})
+        return redirect(url_for("dataset.list_dataset"))
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
