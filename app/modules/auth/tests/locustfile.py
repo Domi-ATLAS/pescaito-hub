@@ -21,6 +21,33 @@ class SignupBehavior(TaskSet):
             print(f"Signup failed: {response.status_code}")
 
 
+class PasswordRecoveryBehavior(TaskSet):
+    def on_start(self):
+        self.recover_password()
+
+    @task(1)
+    def get_recover_password(self):
+        response = self.client.get("/recover_password", name = "GET /recover_password")
+        if response.status_code != 200:
+            print(f"Failed to load password recovery page: {response.status_code}")
+            return
+
+def post_recover_password(self):
+    response = self.client.get("/recover_password")
+
+    csrf_token = get_csrf_token(response)
+
+    recovery_email = fake.email()
+    response = self.client.post("/recover_password", data={
+        "email": recovery_email,
+        "csrf_token": csrf_token
+    }, name = "POST /recover_password")
+
+    if response.status_code == 200:
+        print(f"Password recovery initiated for {recovery_email}")
+    else:
+        print(f"Password recovery failed for {recovery_email}: {response.status_code}")
+
 class LoginBehavior(TaskSet):
     def on_start(self):
         self.ensure_logged_out()
