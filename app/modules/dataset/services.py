@@ -17,6 +17,10 @@ from app.modules.dataset.repositories import (
     DSViewRecordRepository,
     DataSetRepository
 )
+from datetime import datetime
+import json
+
+
 from app.modules.featuremodel.repositories import FMMetaDataRepository, FeatureModelRepository
 from app.modules.hubfile.repositories import (
     HubfileDownloadRecordRepository,
@@ -48,6 +52,83 @@ class DataSetService(BaseService):
         self.hubfilerepository = HubfileRepository()
         self.dsviewrecord_repostory = DSViewRecordRepository()
         self.hubfileviewrecord_repository = HubfileViewRecordRepository()
+
+    def create_local_deposition(self, dataset: DataSet):
+        # Aquí se asume que 'dataset' ya contiene los datos necesarios para 'metadata'
+        
+        deposition_id = None
+        deposition_dir = None
+        metadata = None
+
+        # Generación de DOI
+        publication_doi = f"10.1234/{uuid.uuid4()}"
+        dataset_doi = f"10.1234/{uuid.uuid4()}"
+
+        # Asignación de los datos de metadata
+        metadata = {
+            "title": dataset.ds_meta_data.title,
+            "description": dataset.ds_meta_data.description,
+            "publication_type": dataset.ds_meta_data.publication_type.name,
+            "publication_doi": publication_doi,
+            "dataset_doi": dataset_doi,
+            "tags": dataset.ds_meta_data.tags,
+        }
+
+        # Agregar log para verificar el contenido de 'metadata'
+        logger.info(f"Metadata before saving: {metadata}")
+
+        # Ahora actualizamos la metadata en la base de datos
+        try:
+            # Asignamos el DOI a la metadata en la base de datos
+            dataset.ds_meta_data.dataset_doi = dataset_doi
+            
+            # Guardamos la metadata en la base de datos
+            self.dsmetadata_repository.update(dataset.ds_meta_data.id, dataset_doi=dataset_doi)
+
+            # Guardamos el archivo de metadata como JSON
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            unique_id = uuid.uuid4().hex[:8]
+            filename = f"Deposition_{timestamp}_{unique_id}.json"
+
+            # Crear y escribir el archivo
+            with open(filename, "w") as f:
+                json.dump(metadata, f)
+            logger.info(f"Metadata successfully written to {filename}")
+
+        except Exception as e:
+            logger.error(f"Error serializing or saving metadata: {e}")
+            raise
+
+        return deposition_id, deposition_dir, metadata
+
+    def upload_files_locally(self, dataset, deposition_dir):
+        # Aquí subimos (guardamos) los archivos locales, como modelos de características
+        for feature_model in dataset.feature_models:
+            # Supongamos que `feature_model` es una ruta al archivo
+            file_path = feature_model.path
+            shutil.copy(file_path, os.path.join(deposition_dir, os.path.basename(file_path)))
+        
+        # Actualizamos la metadata con los archivos subidos
+        for file in os.listdir(deposition_dir):
+            if file != "metadata.json":
+                metadata["files"].append(file)
+
+    def publish_local_deposition(self, deposition_id, deposition_dir):
+        # Simplemente hacemos que el "depósito" esté listo para distribución
+        # En un escenario real, podrías mover los archivos a una ubicación pública
+        pass
+
+    def assign_local_doi(self, deposition_id, deposition_dir):
+        # Asignamos un DOI local utilizando un formato simulado
+        doi = f"10.1234/{deposition_id}"
+        metadata["doi"] = doi
+        
+        # Guardamos el DOI en la metadata
+        with open(os.path.join(deposition_dir, "metadata.json"), "w") as f:
+            json.dump(metadata, f)
+        
+        return doi
+
 
     def move_feature_models(self, dataset: DataSet):
         current_user = AuthenticationService().get_authenticated_user()
@@ -140,6 +221,36 @@ class DataSetService(BaseService):
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
 
+    def set_synchronized(self, dataset_id: int):
+        # Obtén el dataset por su ID
+        dataset = self.repository.get(dataset_id)
+        
+        if not dataset:
+            raise ValueError("Dataset no encontrado")
+
+        # Asignar un DOI al dataset (suponemos que lo generas o lo recuperas)
+        dataset_doi = f"10.1234/{uuid.uuid4()}"  # Ejemplo de generación de DOI
+        # Actualiza el dataset_doi en DSMetaData
+        dataset.ds_meta_data.dataset_doi = dataset_doi
+        
+        # Guarda los cambios
+        self.repository.session.commit()
+        return dataset
+
+
+    def set_unsynchronized(self, dataset_id: int):
+        # Obtén el dataset por su ID
+        dataset = self.repository.get(dataset_id)
+        
+        if not dataset:
+            raise ValueError("Dataset no encontrado")
+
+        # Eliminar el DOI para marcarlo como no sincronizado
+        dataset.ds_meta_data.dataset_doi = None
+        
+        # Guarda los cambios
+        self.repository.session.commit()
+        return dataset    
 
 class AuthorService(BaseService):
     def __init__(self):

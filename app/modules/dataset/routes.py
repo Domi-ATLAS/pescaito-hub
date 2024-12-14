@@ -7,6 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from zipfile import ZipFile
 
+
 from flask import (
     redirect,
     render_template,
@@ -58,55 +59,46 @@ def create_dataset():
 
         try:
             logger.info("Creating dataset...")
+            # Aquí se crea el objeto 'dataset'
             dataset = dataset_service.create_from_form(form=form, current_user=current_user)
             logger.info(f"Created dataset: {dataset}")
+
+            # Usamos el método name() para obtener el nombre
+            dataset_name = dataset.name()  # Aquí estamos obteniendo el 'title' del modelo DSMetaData
+            if not dataset_name:
+                logger.error("Dataset title is missing")
+                return jsonify({"error": "Dataset title is required"}), 400
+
+            logger.info(f"Dataset Name: {dataset_name}")
+
             dataset_service.move_feature_models(dataset)
         except Exception as exc:
-            logger.exception(f"Exception while create dataset data in local {exc}")
-            return jsonify({"Exception while create dataset data in local: ": str(exc)}), 400
+            logger.exception(f"Exception while creating dataset data in local {exc}")
+            return jsonify({"Exception while creating dataset data in local: ": str(exc)}), 400
 
-        # send dataset as deposition to Zenodo
-        data = {}
+        # Ahora pasamos el objeto 'dataset' en lugar de 'dataset_bp'
         try:
-            zenodo_response_json = zenodo_service.create_new_deposition(dataset)
-            response_data = json.dumps(zenodo_response_json)
-            data = json.loads(response_data)
+            deposition_id, deposition_dir, metadata = dataset_service.create_local_deposition(dataset)
+            
+            # Aquí aseguramos que 'metadata' no contenga métodos, sino solo valores serializables
+            metadata["dataset_name"] = dataset_name  # Correcto, asegurándonos de pasar solo el valor del 'title'
+
+            # Asegúrate de que 'metadata' solo contenga datos serializables en JSON
+            logger.info(f"Metadata before saving: {metadata}")
+
+            # Aquí pasamos correctamente los metadatos a JSON
+            with open("metadata.json", "w") as f:
+                json.dump(metadata, f)  # Esto debe funcionar ahora si 'metadata' es un diccionario serializable
+
         except Exception as exc:
-            data = {}
-            zenodo_response_json = {}
-            logger.exception(f"Exception while create dataset data in Zenodo {exc}")
+            logger.exception(f"Error while creating local deposition: {exc}")
+            return jsonify({"message": "Error during local deposition creation"}), 500
+        
+        # El resto del código sigue igual
 
-        if data.get("conceptrecid"):
-            deposition_id = data.get("id")
-
-            # update dataset with deposition id in Zenodo
-            dataset_service.update_dsmetadata(dataset.ds_meta_data_id, deposition_id=deposition_id)
-
-            try:
-                # iterate for each feature model (one feature model = one request to Zenodo)
-                for feature_model in dataset.feature_models:
-                    zenodo_service.upload_file(dataset, deposition_id, feature_model)
-
-                # publish deposition
-                zenodo_service.publish_deposition(deposition_id)
-
-                # update DOI
-                deposition_doi = zenodo_service.get_doi(deposition_id)
-                dataset_service.update_dsmetadata(dataset.ds_meta_data_id, dataset_doi=deposition_doi)
-            except Exception as e:
-                msg = f"it has not been possible upload feature models in Zenodo and update the DOI: {e}"
-                return jsonify({"message": msg}), 200
-
-        # Delete temp folder
-        file_path = current_user.temp_folder()
-        if os.path.exists(file_path) and os.path.isdir(file_path):
-            shutil.rmtree(file_path)
-
-        msg = "Everything works!"
-        return jsonify({"message": msg}), 200
+        return jsonify({"message": "Everything works!"}), 200
 
     return render_template("dataset/upload_dataset.html", form=form)
-
 
 @dataset_bp.route("/dataset/list", methods=["GET", "POST"])
 @login_required
@@ -278,3 +270,27 @@ def get_unsynchronized_dataset(dataset_id):
         abort(404)
 
     return render_template("dataset/view_dataset.html", dataset=dataset)
+
+@dataset_bp.route('/dataset/synchronize/<int:dataset_id>', methods=['POST'])
+@login_required
+def synchronize_dataset(dataset_id):
+    try:
+        # Llama a la función set_synchronized para sincronizar el dataset
+        dataset_service.set_synchronized(dataset_id)
+        # Redirige al usuario a la lista de datasets sincronizados
+        return redirect(url_for('dataset_bp.list_datasets'))
+    except Exception as e:
+        # Manejo de errores
+        return f"Error: {e}"
+
+@dataset_bp.route('/dataset/desynchronize/<int:dataset_id>', methods=['POST'])
+@login_required
+def desynchronize_dataset(dataset_id):
+    try:
+        # Llama a la función set_unsynchronized para desincronizar el dataset
+        dataset_service.set_unsynchronized(dataset_id)
+        # Redirige al usuario a la lista de datasets desincronizados
+        return redirect(url_for('dataset_bp.list_datasets'))
+    except Exception as e:
+        # Manejo de errores
+        return f"Error: {e}"
