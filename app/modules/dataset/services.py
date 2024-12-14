@@ -53,6 +53,13 @@ class DataSetService(BaseService):
         self.dsviewrecord_repostory = DSViewRecordRepository()
         self.hubfileviewrecord_repository = HubfileViewRecordRepository()
 
+
+    def get_dataset_by_id(self, dataset_id: int) -> Optional[DataSet]:
+        dataset = self.repository.get_by_id(dataset_id)
+        if not dataset:
+            raise ValueError(f"Dataset con id {dataset_id} no encontrado.")
+        return dataset
+
     def create_local_deposition(self, dataset: DataSet):
         # Aquí se asume que 'dataset' ya contiene los datos necesarios para 'metadata'
         
@@ -223,8 +230,12 @@ class DataSetService(BaseService):
 
     def set_synchronized(self, dataset_id: int):
         # Obtén el dataset por su ID
-        dataset = self.repository.get(dataset_id)
+        dataset = self.get_dataset_by_id(dataset_id)
         
+        if dataset.ds_meta_data.dataset_doi:
+            raise ValueError("Este dataset ya está sincronizado")
+
+
         if not dataset:
             raise ValueError("Dataset no encontrado")
 
@@ -240,8 +251,11 @@ class DataSetService(BaseService):
 
     def set_unsynchronized(self, dataset_id: int):
         # Obtén el dataset por su ID
-        dataset = self.repository.get(dataset_id)
+        dataset = self.get_dataset_by_id(dataset_id)
         
+        if not dataset.ds_meta_data.dataset_doi:
+            raise ValueError("Este dataset ya está desincronizado")
+
         if not dataset:
             raise ValueError("Dataset no encontrado")
 

@@ -271,26 +271,29 @@ def get_unsynchronized_dataset(dataset_id):
 
     return render_template("dataset/view_dataset.html", dataset=dataset)
 
-@dataset_bp.route('/dataset/synchronize/<int:dataset_id>', methods=['POST'])
+@dataset_bp.route('/dataset/synchronize/<int:dataset_id>', methods=["POST"])
 @login_required
 def synchronize_dataset(dataset_id):
     try:
-        # Llama a la función set_synchronized para sincronizar el dataset
+        # Sincroniza el dataset
         dataset_service.set_synchronized(dataset_id)
-        # Redirige al usuario a la lista de datasets sincronizados
-        return redirect(url_for('dataset_bp.list_datasets'))
+        # Redirige a la lista de datasets
+        return redirect(url_for("dataset.list_dataset"))
     except Exception as e:
         # Manejo de errores
-        return f"Error: {e}"
+        logger.error(f"Error while synchronizing dataset: {e}")
+        return f"Error: {e}", 500
 
-@dataset_bp.route('/dataset/desynchronize/<int:dataset_id>', methods=['POST'])
+@dataset_bp.route('/dataset/desynchronize/<int:dataset_id>', methods=["POST"])
 @login_required
 def desynchronize_dataset(dataset_id):
     try:
-        # Llama a la función set_unsynchronized para desincronizar el dataset
+        # Desincroniza el dataset
         dataset_service.set_unsynchronized(dataset_id)
-        # Redirige al usuario a la lista de datasets desincronizados
-        return redirect(url_for('dataset_bp.list_datasets'))
+
+        # Redirige a la lista de datasets
+        return redirect(url_for("dataset.list_dataset"))
     except Exception as e:
         # Manejo de errores
-        return f"Error: {e}"
+        logger.error(f"Error while desynchronizing dataset: {e}")
+        return f"Error: {e}", 500
