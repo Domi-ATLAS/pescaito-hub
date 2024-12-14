@@ -14,6 +14,7 @@ from app.modules.dataset.models import (
     DataSet
 )
 from core.repositories.BaseRepository import BaseRepository
+from app import db
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +122,16 @@ class DataSetRepository(BaseRepository):
             .limit(5)
             .all()
         )
+    
+    def latest_unsynchronized(self):
+        return (
+            self.model.query.join(DSMetaData)
+            .filter(DSMetaData.dataset_doi.is_(None))
+            .order_by(self.model.created_at.desc())
+            .limit(5)  
+            .all()
+    )
+
 
 
 class DOIMappingRepository(BaseRepository):

@@ -1,0 +1,344 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<div class="container mt-5 dashboard-container">
+    <h1 id="dashboard-title" class="mb-4 text-center">Dashboard</h1>
+
+    <div class="row g-4 justify-content-center">
+        <h3 class="text-center">Dataset Statistics</h3>
+
+
+        {% if current_user.is_authenticated %}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard.export_user_summary') }}" class="btn btn-primary">
+                Export User Summary as PDF
+            </a>
+        </div>        
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-user fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">My Datasets</h5>
+                    <p id="user-datasets-count" class="display-5 fw-bold text-dark">{{ user_datasets_count }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-database fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Unsynchronized Datasets</h5>
+                    <p id="total_unsynchronized_datasets" class="display-5 fw-bold text-dark">{{ total_unsynchronized_datasets }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-database fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Synchronized Datasets</h5>
+                    <p id="total_synchronized_datasets" class="display-5 fw-bold text-dark">{{ total_synchronized_datasets }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-download fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">Dataset Downloads</h5>
+                    <p id="total_dataset_downloads" class="display-5 fw-bold text-dark">{{ total_dataset_downloads }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-eye fa-3x text-dark"></i>
+                    </div>
+                    <h5 class="card-title">Dataset Views</h5>
+                    <p id="total_dataset_views" class="display-5 fw-bold text-dark">{{ total_dataset_views }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-eye fa-3x text-dark"></i>
+                    </div>
+                    <h5 class="card-title">Latest Unsynchronized Datasets</h5>
+                    <ul id="latest_unsynchronized_datasets" class="list-group list-group-flush">
+                        {% for dataset in latest_unsynchronized_datasets %}
+                            <li class="list-group-item text-dark">
+                                <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=dataset.id) }}">
+                                    Dataset de modelos seleccionados {{ dataset.id }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="container mt-5 text-center">
+        <button id="generateChartBtn" class="btn btn-primary mb-4">Generar Gráfica</button>
+        <canvas id="datasetStatisticsChart" width="800" height="400" style="display: none;"></canvas>
+    </div>
+    {% endif %}
+
+    <div class="row g-4 justify-content-center mt-5">
+        <h3 class="text-center">Feature Model Statistics</h3>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-layer-group fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">Feature Models</h5>
+                    <p id="feature-models-count" class="display-5 fw-bold" style="color: darkblue;">{{ total_feature_models }}</p>
+                </div>
+            </div>
+        </div>
+        {% if current_user.is_authenticated %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-cloud-download-alt fa-3x text-danger"></i>
+                    </div>
+                    <h5 class="card-title">Model Downloads</h5>
+                    <p id="total_feature_model_downloads" class="display-5 fw-bold" style="color: darkblue;">{{ total_feature_model_downloads }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_user.is_authenticated %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow border-0 text-center">
+                <div class="card-body">
+                    <div class="icon mb-3">
+                        <i class="fas fa-chart-line fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="card-title">Model Views</h5>
+                    <p id="total_feature_model_views"class="display-5 fw-bold " style="color: darkblue;">{{ total_feature_model_views }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="container mt-5 text-center">
+        <button id="generateChartBtn2" class="btn btn-primary mb-4">Generar Gráfica</button>
+        <canvas id="featureModelsStatisticsChart" width="800" height="400" style="display: none;"></canvas>
+    </div>
+    {% endif %}
+
+    <div class="container mt-5">
+        <div class="row g-4 justify-content-center">
+            <h3 class="text-center">General Statistics</h3>
+    
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow border-0 text-center">
+                    <div class="card-body">
+                        <div class="icon mb-3">
+                            <i class="fas fa-users fa-3x text-purple"></i>
+                        </div>
+                        <h5 class="card-title">Total Teams</h5>
+                        <p class="display-5 fw-bold text-purple">{{ total_teams }}</p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow border-0 text-center">
+                    <div class="card-body">
+                        <div class="icon mb-3">
+                            <i class="fas fa-users fa-3x text-purple"></i>
+                        </div>
+                        <h5 class="card-title">Total Authors</h5>
+                        <p class="display-5 fw-bold text-purple">{{ total_authors }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("generateChartBtn");
+    const chartCanvas = document.getElementById("datasetStatisticsChart");
+    let chartInstance = null;
+
+    button.addEventListener("click", function () {
+        chartCanvas.style.display = "block";
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+        function getValue(selector) {
+            const element = document.querySelector(selector);
+            if (element) {
+                const value = parseInt(element.textContent);
+                console.log(`Valor para selector "${selector}":`, value); 
+                return value || 0;
+            } else {
+                console.warn(`Elemento no encontrado para selector: ${selector}`);
+                return 0;
+            }
+        }
+
+        const myDatasets = getValue('#user-datasets-count');
+        const unsynchronizedDatasets = getValue('#total_unsynchronized_datasets'); 
+        const totalSynchronizedDatasets = getValue('#total_synchronized_datasets'); 
+        const datasetDownloads = getValue('#total_dataset_downloads'); 
+        const datasetViews = getValue('#total_dataset_views');
+
+        console.log('Valores obtenidos:', {
+            myDatasets,
+            unsynchronizedDatasets,
+            totalSynchronizedDatasets,
+            datasetDownloads,
+            datasetViews
+        });
+
+  
+        const ctx = chartCanvas.getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['My Datasets', 'Unsynchronized Datasets', 'Synchronized Datasets', 'Dataset Downloads', 'Dataset Views'],
+                datasets: [{
+                    label: 'Dataset Statistics',
+                    data: [myDatasets, unsynchronizedDatasets, totalSynchronizedDatasets, datasetDownloads, datasetViews],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(255, 99, 132, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+});
+
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("generateChartBtn2");
+    const chartCanvas = document.getElementById("featureModelsStatisticsChart");
+    let chartInstance = null;
+
+    button.addEventListener("click", function () {
+        chartCanvas.style.display = "block";
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        function getValue(selector) {
+            const element = document.querySelector(selector);
+            if (element) {
+                const value = parseInt(element.textContent);
+                console.log(`Valor para selector "${selector}":`, value); 
+                return value || 0;
+            } else {
+                console.warn(`Elemento no encontrado para selector: ${selector}`);
+                return 0;
+            }
+        }
+
+        const featureModels = getValue('#feature-models-count');
+        const downloads = getValue('#total_feature_model_downloads'); 
+        const views = getValue('#total_feature_model_views'); 
+
+        console.log('Valores obtenidos:', {
+            featureModels,
+            downloads,
+            views,
+        });
+
+        const ctx = chartCanvas.getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Feature Models', 'Model Downloads', 'Model Views'],
+                datasets: [{
+                    label: 'Dataset Statistics',
+                    data: [featureModels, downloads, views],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+});
+
+</script>
+
+{% endblock %}

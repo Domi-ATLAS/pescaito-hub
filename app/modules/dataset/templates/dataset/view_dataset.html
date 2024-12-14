@@ -122,7 +122,15 @@
         <div class="card">
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
-                    <h1><b>{{ dataset.ds_meta_data.title }}</b></h1>
+                    <h1><b>
+                        {% if total_unsynchronized_datasets is defined and total_unsynchronized_datasets > 0 and dataset.ds_meta_data.dataset_doi is none %}
+                            Dataset de modelos seleccionados {{ dataset.id }}
+                        {% else %}
+                            {{ dataset.ds_meta_data.title }}
+                        {% endif %}
+                    </b></h1>
+                    
+                    
                     <div>
                         <span class="badge bg-secondary">{{ dataset.get_cleaned_publication_type() }}</span>
                     </div>

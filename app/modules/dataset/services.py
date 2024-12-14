@@ -119,6 +119,9 @@ class DataSetService(BaseService):
 
     def latest_synchronized(self):
         return self.repository.latest_synchronized()
+    
+    def latest_unsynchronized(self):
+        return self.repository.latest_unsynchronized()
 
     def count_synchronized_datasets(self):
         return self.repository.count_synchronized_datasets()
@@ -185,6 +188,12 @@ class DataSetService(BaseService):
     def get_uvlhub_doi(self, dataset: DataSet) -> str:
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
+    
+    def count_unsynchronized_datasets(self, current_user_id: int) -> int:
+        unsynchronized_datasets = self.get_unsynchronized(current_user_id)
+        return len(unsynchronized_datasets) if unsynchronized_datasets else 0
+    
+
 
 
 class AuthorService(BaseService):
