@@ -265,6 +265,35 @@ class DataSetService(BaseService):
         # Guarda los cambios
         self.repository.session.commit()
         return dataset    
+    
+    def delete(self, dataset_id: int) -> bool:
+        """
+        Elimina el dataset y sus registros relacionados (vistas, descargas),
+        pero solo si el dataset está desincronizado (sin DOI).
+        """
+        try:
+            # Obtener el dataset por ID
+            dataset = self.get_dataset_by_id(dataset_id)
+
+            # Verificar si el dataset existe
+            if not dataset:
+                raise ValueError(f"Dataset con ID {dataset_id} no encontrado.")
+
+            # Verificar si el dataset está sincronizado (si tiene un DOI asignado)
+            if dataset.ds_meta_data.dataset_doi:
+                raise ValueError(f"El dataset con ID {dataset_id} está sincronizado y no puede eliminarse.")
+
+            # Llamar al repositorio para eliminar el dataset
+            if self.repository.delete_by_id(dataset_id):
+                logger.info(f"Dataset con ID {dataset_id} eliminado exitosamente.")
+                return True
+            else:
+                logger.error(f"No se pudo eliminar el dataset con ID {dataset_id}.")
+                return False
+
+        except Exception as e:
+            logger.error(f"Error al eliminar el dataset con ID {dataset_id}: {e}")
+            return False
 
 class AuthorService(BaseService):
     def __init__(self):

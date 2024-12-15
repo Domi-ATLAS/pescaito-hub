@@ -297,3 +297,24 @@ def desynchronize_dataset(dataset_id):
         # Manejo de errores
         logger.error(f"Error while desynchronizing dataset: {e}")
         return f"Error: {e}", 500
+    
+@dataset_bp.route('/dataset/delete/<int:dataset_id>', methods=["POST"])
+@login_required
+def delete_dataset(dataset_id):
+    try:
+        # Llama al servicio para eliminar el dataset
+        dataset = dataset_service.get_or_404(dataset_id)
+
+        # Verificamos que el usuario que está intentando eliminar el dataset sea el dueño
+        if dataset.user_id != current_user.id:
+            return jsonify({"error": "No tienes permiso para eliminar este dataset"}), 403
+        
+        # Elimina el dataset
+        dataset_service.delete(dataset_id)
+        
+        # Si la eliminación fue exitosa, redirige a la lista de datasets
+        return redirect(url_for('dataset.list_dataset'))
+
+    except Exception as e:
+        logger.error(f"Error while deleting dataset {dataset_id}: {e}")
+        return jsonify({"message": "Error al eliminar el dataset"}), 500
