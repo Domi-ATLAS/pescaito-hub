@@ -1,4 +1,4 @@
-name: Run tests in paralell
+name: Run tests in parallel
 
 on:
   push:
@@ -29,15 +29,19 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Prepare environment
-      run: |
-        sed -i '/rosemary @ file:\/\/\/app/d' requirements.txt
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest-xdist
+
+    - name: Reset Database
+      run: |
+        mysql -h 127.0.0.1 -u root -p'uvlhub_root_password' -e "DROP DATABASE IF EXISTS uvlhubdb_test; CREATE DATABASE uvlhubdb_test;"
+
+    - name: Apply Database Migrations
+      run: |
+        flask db upgrade
 
     - name: Run Tests
       env:
@@ -56,5 +60,3 @@ jobs:
       with:
         name: pytest-results
         path: .pytest_cache/
-
-
