@@ -33,30 +33,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest-xdist
-
-    - name: Verify User Permissions
-      run: |
-        mysql -h 127.0.0.1 -u root -p'uvlhub_root_password' -e "
-        GRANT ALL PRIVILEGES ON uvlhubdb_test.* TO 'uvlhub_user'@'%';
-        FLUSH PRIVILEGES;"
-
-    - name: Reset Database
-      run: |
-        mysql -h 127.0.0.1 -u root -p'uvlhub_root_password' -e "
-        DROP DATABASE IF EXISTS uvlhubdb_test;
-        CREATE DATABASE uvlhubdb_test;"
-
-    - name: Apply Database Migrations
-      env:
-        FLASK_ENV: testing
-        MARIADB_HOSTNAME: 127.0.0.1
-        MARIADB_PORT: 3306
-        MARIADB_TEST_DATABASE: uvlhubdb_test
-        MARIADB_USER: uvlhub_user
-        MARIADB_PASSWORD: uvlhub_password
-      run: |
-        flask db upgrade
 
     - name: Run Tests
       env:
@@ -67,11 +43,4 @@ jobs:
         MARIADB_USER: uvlhub_user
         MARIADB_PASSWORD: uvlhub_password
       run: |
-        pytest -n auto app/modules/ --ignore-glob='*selenium*'
-
-    - name: Save Test Results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: pytest-results
-        path: .pytest_cache/
+        pytest app/modules/ --ignore-glob='*selenium*'
