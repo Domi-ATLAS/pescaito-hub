@@ -54,16 +54,12 @@ def test_get_dataset_by_id_not_found(dataset_service):
         dataset_service.get_dataset_by_id(999)
 
 
-@pytest.mark.parametrize("rating, is_valid", [
-    (1, True),  # Límite inferior permitido
-    (5, True),  # Límite superior permitido
-    (0, False), # Rating menor al mínimo
-    (6, False)  # Rating mayor al máximo
-], ids=["min_rating", "max_rating", "below_min", "above_max"])
-def test_update_rating_with_valid_and_invalid_values(dataset_service, app, rating, is_valid):
-    """Probar actualización de rating con valores límite y no válidos."""
-    with app.app_context():  # Proporcionar contexto de aplicación
-        if is_valid:
+def test_update_rating_with_valid_values(dataset_service, app):
+    """Probar actualización de rating con valores válidos."""
+    with app.app_context():  
+        valid_ratings = [1, 5]
+
+        for rating in valid_ratings:
             mock_rate = Rate(id=1, rating=rating, dataset_id=1, user_id=1)
             dataset_service.update_rating = MagicMock(return_value=mock_rate)
 
@@ -71,8 +67,15 @@ def test_update_rating_with_valid_and_invalid_values(dataset_service, app, ratin
 
             assert result == mock_rate
             dataset_service.update_rating.assert_called_once_with(mock_rate.dataset_id, mock_rate.rating)
-        else:
-            with patch('app.modules.dataset.services.current_user', MagicMock(id=1)):  # Mockear usuario
+
+
+def test_update_rating_with_invalid_values(dataset_service, app):
+    """Probar actualización de rating con valores inválidos."""
+    with app.app_context():  
+        invalid_ratings = [0, 6]
+
+        for rating in invalid_ratings:
+            with patch('app.modules.dataset.services.current_user', MagicMock(id=1)):  
                 with pytest.raises(ValueError, match="El valor del rating debe estar entre 1 y 5"):
                     dataset_service.update_rating(dataset_id=1, rating=rating)
 
