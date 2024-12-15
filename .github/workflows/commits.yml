@@ -15,12 +15,20 @@ jobs:
 
       - name: Obtener commits del push
         run: |
+          # Actualizar la rama develop desde remoto
+          git fetch origin develop
+      
           # Obtener los commits realizados en el push
           commits=$(git log origin/develop..HEAD --oneline)
           echo "Commits realizados en el push:"
           echo "$commits"
-
+      
           # Validar cada commit
+          if [ -z "$commits" ]; then
+            echo "No hay commits nuevos en el rango especificado."
+            exit 0
+          fi
+      
           while IFS= read -r commit; do
             mensaje=$(echo "$commit" | awk '{$1=""; print $0}' | xargs)
             
@@ -32,5 +40,6 @@ jobs:
               exit 1
             fi
           done <<< "$commits"
-
+      
           echo "Todos los mensajes de commit cumplen con el formato esperado."
+      
