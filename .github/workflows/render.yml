@@ -2,8 +2,6 @@ name: Deploy to Render
 
 on:
   push:
-    branches:
-      - develop
     tags:
       - 'v*'  
   pull_request:
@@ -23,18 +21,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Debug environment variables
-        run: |
-          echo "MARIADB_HOSTNAME=${{ secrets.MARIADB_HOSTNAME }}"
-          echo "MARIADB_PORT=${{ secrets.MARIADB_PORT }}"
-          echo "MARIADB_DATABASE=${{ secrets.MARIADB_DATABASE }}"
-          echo "MARIADB_USER=${{ secrets.MARIADB_USER }}"
-          echo "FLASK_ENV=${{ secrets.FLASK_ENV }}"
-
-      - name: Test MySQL Connection
-        run: |
-          mysql -h ${{ secrets.MARIADB_HOSTNAME }} -P ${{ secrets.MARIADB_PORT }} -u${{ secrets.MARIADB_USER }} -p${{ secrets.MARIADB_PASSWORD }} -e "SHOW DATABASES;"
 
       - name: Install dependencies
         run: |
