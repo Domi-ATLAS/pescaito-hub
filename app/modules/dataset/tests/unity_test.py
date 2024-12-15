@@ -69,26 +69,16 @@ def test_update_rating_with_valid_values(dataset_service, app):
             dataset_service.update_rating.assert_called_once_with(mock_rate.dataset_id, mock_rate.rating)
 
 
-def test_update_rating_with_invalid_rating_zero(dataset_service, app):
-    """Probar actualización de rating con calificación inválida (0)."""
+
+def test_update_rating_with_invalid_values(dataset_service, app):
+    """Probar actualización de rating con valores inválidos."""
     with app.app_context():  
-        invalid_rating = 0
+        invalid_ratings = [0, 6]
 
-        with patch('app.modules.dataset.services.current_user', MagicMock(id=1)):  
-            with pytest.raises(ValueError, match="El valor del rating debe estar entre 1 y 5"):
-                # Intentamos actualizar con rating 0
-                dataset_service.update_rating(dataset_id=1, rating=invalid_rating)
-
-
-def test_update_rating_with_invalid_rating_six(dataset_service, app):
-    """Probar actualización de rating con calificación inválida (6)."""
-    with app.app_context():  
-        invalid_rating = 6
-
-        with patch('app.modules.dataset.services.current_user', MagicMock(id=1)):  
-            with pytest.raises(ValueError, match="El valor del rating debe estar entre 1 y 5"):
-                # Intentamos actualizar con rating 6
-                dataset_service.update_rating(dataset_id=1, rating=invalid_rating)
+        for rating in invalid_ratings:
+            with patch('app.modules.dataset.services.current_user', MagicMock(id=1)):  
+                with pytest.raises(ValueError, match="El valor del rating debe estar entre 1 y 5."):
+                    dataset_service.update_rating(dataset_id=1, rating=rating)
 
 def test_user_already_rated(dataset_service, mock_query, app):
     """Probar que no se permite calificar un dataset más de una vez."""
