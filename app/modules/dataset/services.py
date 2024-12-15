@@ -6,6 +6,8 @@ from typing import Optional
 import uuid
 
 from flask import request
+from flask_login import current_user
+
 
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
@@ -235,6 +237,9 @@ class DataSetService(BaseService):
         if dataset.ds_meta_data.dataset_doi:
             raise ValueError("Este dataset ya está sincronizado")
 
+        if dataset.user_id != current_user.id:
+            raise ValueError("No puedes sincronizar un dataset que no te pertenece")
+
 
         if not dataset:
             raise ValueError("Dataset no encontrado")
@@ -255,6 +260,9 @@ class DataSetService(BaseService):
         
         if not dataset.ds_meta_data.dataset_doi:
             raise ValueError("Este dataset ya está desincronizado")
+
+        if dataset.user_id != current_user.id:
+            raise ValueError("No puedes desincronizar un dataset que no te pertenece")
 
         if not dataset:
             raise ValueError("Dataset no encontrado")
