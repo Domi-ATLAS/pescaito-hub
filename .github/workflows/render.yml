@@ -26,6 +26,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -e ./
 
       - name: Populate Database
         env:
@@ -37,7 +38,8 @@ jobs:
           MARIADB_PASSWORD: ${{ secrets.MARIADB_PASSWORD }}
         run: |
           flask db upgrade  
-          flask db seed     
+          rosemary db:seed
+            
 
       - name: Deploy to Render
         env:
