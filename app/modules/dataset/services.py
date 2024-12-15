@@ -70,7 +70,6 @@ class DataSetService(BaseService):
         metadata = None
 
         # Generación de DOI
-        publication_doi = f"10.1234/{uuid.uuid4()}"
         dataset_doi = f"10.1234/{uuid.uuid4()}"
 
         # Asignación de los datos de metadata
@@ -78,7 +77,7 @@ class DataSetService(BaseService):
             "title": dataset.ds_meta_data.title,
             "description": dataset.ds_meta_data.description,
             "publication_type": dataset.ds_meta_data.publication_type.name,
-            "publication_doi": publication_doi,
+            "publication_doi": dataset.ds_meta_data.publication_doi,
             "dataset_doi": dataset_doi,
             "tags": dataset.ds_meta_data.tags,
         }
