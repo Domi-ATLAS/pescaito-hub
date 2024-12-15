@@ -19,8 +19,8 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: uvlhub_root_password
           MYSQL_DATABASE: uvlhubdb_test
-          MYSQL_USER: uvlhub_user
-          MYSQL_PASSWORD: uvlhub_password
+          MYSQL_USER: uvlhubdb_user
+          MYSQL_PASSWORD: uvlhubdb_password
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -46,8 +46,8 @@ jobs:
           MARIADB_HOSTNAME: 127.0.0.1
           MARIADB_PORT: 3306
           MARIADB_DATABASE: uvlhubdb_test
-          MARIADB_USER: uvlhubdb_user
-          MARIADB_PASSWORD: uvlhubdb_password
+          MARIADB_USER: uvlhub_user
+          MARIADB_PASSWORD: uvlhub_password
         run: |
           pytest app/modules/ --ignore-glob='*selenium*'
 
