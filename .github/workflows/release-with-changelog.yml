@@ -7,6 +7,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   release:
     if: >
@@ -21,65 +24,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10' # Cambia según tus necesidades
+          python-version: '3.12'
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18' # Cambia según tus necesidades
-
-      - name: Install Node.js dependencies
-        run: npm install
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
       - name: Run semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Se usa para autenticar con GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
-
-      - name: Get version from PR title or increment it
-        run: |
-          # Obtener el título de la PR
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          echo "PR title: $PR_TITLE"
-
-          # Buscar un patrón de versión X.Y.Z en el título
-          VERSION_PATTERN="([0-9]+)\.([0-9]+)\.([0-9]+)"
-          if [[ "$PR_TITLE" =~ $VERSION_PATTERN ]]; then
-            # Si se encuentra un patrón de versión, extraerlo
-            MAJOR="${BASH_REMATCH[1]}"
-            MINOR="${BASH_REMATCH[2]}"
-            PATCH="${BASH_REMATCH[3]}"
-            echo "Found version: $MAJOR.$MINOR.$PATCH"
-          else
-            # Si no se encuentra, obtener la versión desde package.json y sumarle 1 al PATCH
-            CURRENT_VERSION=$(jq -r .version package.json)
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-            PATCH=$((PATCH + 1))
-            echo "No version found in PR title, incrementing patch to: $MAJOR.$MINOR.$PATCH"
-          fi
-
-          # Crear la nueva versión
-          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "New version: $NEW_VERSION"
-
-          # Actualizar la versión en package.json (opcional)
-          jq ".version = \"$NEW_VERSION\"" package.json > package.json.tmp && mv package.json.tmp package.json
-
-          # Crear la etiqueta con la nueva versión
-          git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
-
-          # Empujar la etiqueta al repositorio remoto
-          git push origin "v$NEW_VERSION"
-
-      - name: Commit updated version
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-          git add package.json CHANGELOG.md
-          git commit -m "chore(release): update version to $(jq -r .version package.json)"
-          git push

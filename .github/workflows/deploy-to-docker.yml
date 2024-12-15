@@ -1,0 +1,35 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - develop  # Se ejecuta cuando haces push en la rama "develop"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clonar el repositorio
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+
+      # 2. Configurar Docker
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 3. Iniciar sesión en Docker Hub
+      - name: Iniciar sesión en Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 4. Construir y subir la imagen a Docker Hub
+      - name: Construir y subir imagen
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/images/Dockerfile.dev  # Ruta a tu Dockerfile
+          push: true
+          tags: pescaitoteam/pescaito-hub:dev  # Nombre y etiqueta de la imagen
