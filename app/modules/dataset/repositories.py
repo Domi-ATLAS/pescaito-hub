@@ -14,6 +14,7 @@ from app.modules.dataset.models import (
     DataSet
 )
 from core.repositories.BaseRepository import BaseRepository
+from app import db
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,14 @@ class DataSetRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
+    def get_by_id(self, dataset_id: int) -> Optional[DataSet]:
+        return self.model.query.filter_by(id=dataset_id).first()
+
+    def update(self, dataset: DataSet): 
+        updated_dataset =self.session.merge(dataset)
+        self.session.commit()
+        return updated_dataset
+
     def get_synchronized(self, current_user_id: int) -> DataSet:
         return (
             self.model.query.join(DSMetaData)
@@ -113,6 +122,46 @@ class DataSetRepository(BaseRepository):
             .limit(5)
             .all()
         )
+    
+    def delete_by_id(self, dataset_id: int):
+        dataset = self.session.query(DataSet).filter(DataSet.id == dataset_id).first()
+        if dataset:
+            # Eliminar los registros relacionados (vistas, descargas)
+            self.delete_related_records(dataset)
+
+            # Eliminar el dataset
+            self.session.delete(dataset)
+            self.session.commit()
+
+            logger.info(f"Dataset {dataset_id} eliminado exitosamente de la base de datos.")
+            return True
+        return False
+
+    def delete_related_records(self, dataset: DataSet):
+        try:
+            # Eliminar registros de vistas
+            self.session.query(DSViewRecord).filter(DSViewRecord.dataset_id == dataset.id).delete()
+
+            # Eliminar registros de descargas
+            self.session.query(DSDownloadRecord).filter(DSDownloadRecord.dataset_id == dataset.id).delete()
+
+            # Aquí puedes agregar más eliminaciones si hay otros registros relacionados
+            self.session.commit()
+
+            logger.info(f"Registros relacionados con el dataset {dataset.id} eliminados correctamente.")
+        except Exception as e:
+            logger.error(f"Error al eliminar registros relacionados para el dataset {dataset.id}: {e}")
+            self.session.rollback()
+    def latest_unsynchronized(self):
+        return (
+            self.model.query.join(DSMetaData)
+            .filter(DSMetaData.dataset_doi.is_(None))
+            .order_by(self.model.created_at.desc())
+            .limit(5)  
+            .all()
+    )
+
+
 
 
 class DOIMappingRepository(BaseRepository):

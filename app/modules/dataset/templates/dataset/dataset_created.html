@@ -1,0 +1,20 @@
+<!-- dataset_created.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Dataset Created</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Dataset Created Successfully!</h2>
+        <p>Title: {{ dataset.title }}</p>
+        <p>Description: {{ dataset.description }}</p>
+        <p>Publication Type: {{ dataset.publication_type }}</p>
+        <p>Dataset DOI: <a href="{{ dataset.doi }}">{{ dataset.doi }}</a></p>
+        <a href="{{ url_for('dataset.list_dataset') }}" class="btn btn-primary mt-3">Back to My Datasets</a>
+    </div>
+</body>
+</html>

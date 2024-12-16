@@ -1,10 +1,11 @@
+# app/__init__.py
+
 import os
-
 from flask import Flask
-
 from flask_sqlalchemy import SQLAlchemy
-from dotenv import load_dotenv
 from flask_migrate import Migrate
+from flask_mail import Mail
+from dotenv import load_dotenv
 
 from core.configuration.configuration import get_app_version
 from core.managers.module_manager import ModuleManager
@@ -15,10 +16,10 @@ from core.managers.logging_manager import LoggingManager
 # Load environment variables
 load_dotenv()
 
-# Create the instances
+# Create instances for extensions
 db = SQLAlchemy()
 migrate = Migrate()
-
+mail = Mail()  # Instancia de Flask-Mail aquí
 
 def create_app(config_name='development'):
     app = Flask(__name__)
@@ -26,6 +27,18 @@ def create_app(config_name='development'):
     # Load configuration according to environment
     config_manager = ConfigManager(app)
     config_manager.load_config(config_name=config_name)
+
+    # Configuración de Flask-Mail para Outlook/Hotmail
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587  # Puerto para TLS
+    app.config['MAIL_USE_TLS'] = True  # Usar TLS
+    app.config['MAIL_USE_SSL'] = False  # No usar SSL
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')  # Tu correo de Gmail
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # La contraseña de la aplicación de Gmail
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')  # El correo por defecto para enviar
+
+    # Inicialización de Flask-Mail
+    mail.init_app(app)
 
     # Initialize SQLAlchemy and Migrate with the app
     db.init_app(app)
@@ -66,5 +79,6 @@ def create_app(config_name='development'):
 
     return app
 
+app = create_app() 
 
-app = create_app()
+

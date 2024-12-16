@@ -29,6 +29,92 @@
 
 </div>
 
+<div style="display: flex; justify-content: flex-start; gap:10px;">
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=1) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★</button>
+        </div>
+    </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=2) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★</button>
+        </div>
+    </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=3) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★★</button>
+        </div>
+    </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=4) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★★★</button>
+        </div>
+    </div>
+</form>
+
+
+<form id="rating-form" action="{{ url_for('dataset.update_rating', dataset_id=dataset.id, rating=5) }}" method="POST">
+    <div class="row mb-3">
+        <div class="col-6">
+            <button type="submit" class="btn btn-primary">★★★★★</button>
+        </div>
+    </div>
+</form>
+
+<div class="col-12">
+    <p class="text-muted">Valoración promedio: <strong>{{ dataset.avgRating }}</strong> ★</p>
+</div>
+
+</div>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .star-rating {
+        font-size: 24px;
+        display: inline-block;
+    }
+
+    .star {
+        color: lightgray;
+        cursor: pointer;
+        position: relative;
+        display: inline-block;
+    }
+
+    .star.full i {
+        color: #FFD700; /* gold color for full stars */
+    }
+
+    .star.half i {
+        background: linear-gradient(90deg, #FFD700 50%, lightgray 50%);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    .star i {
+        color: lightgray;
+    }
+</style>
+
+
+
 <div class="row">
 
     <div class="col-xl-8 col-lg-12 col-md-12 col-sm-12">
@@ -36,7 +122,15 @@
         <div class="card">
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
-                    <h1><b>{{ dataset.ds_meta_data.title }}</b></h1>
+                    <h1><b>
+                        {% if total_unsynchronized_datasets is defined and total_unsynchronized_datasets > 0 and dataset.ds_meta_data.dataset_doi is none %}
+                            Dataset de modelos seleccionados {{ dataset.id }}
+                        {% else %}
+                            {{ dataset.ds_meta_data.title }}
+                        {% endif %}
+                    </b></h1>
+                    
+                    
                     <div>
                         <span class="badge bg-secondary">{{ dataset.get_cleaned_publication_type() }}</span>
                     </div>
@@ -147,15 +241,18 @@
                         </span>
                     </div>
                     <div class="col-md-8 col-12">
-                        {% for tag in dataset.ds_meta_data.tags.split(',') %}
-                        <span class="badge bg-secondary">{{ tag.strip() }}</span>
-                        {% endfor %}
+                        {% if dataset.ds_meta_data.tags %}
+                            {% for tag in dataset.ds_meta_data.tags.split(',') %}
+                                <span class="badge bg-secondary">{{ tag.strip() }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <p>No hay tags disponibles</p>
+                        {% endif %}
                     </div>
 
                 </div>
 
                 
-
             </div>
 
             {% if dataset.ds_meta_data.dataset_doi %}
@@ -330,7 +427,35 @@
             <i data-feather="download" class="center-button-icon"></i>
             Download all ({{ dataset.get_file_total_size_for_human() }})
         </a>
+
+        
+        {% if dataset.ds_meta_data.dataset_doi %}
+            <!-- Si tiene DOI, está sincronizado, mostramos el botón de desincronización -->
+            <form action="/dataset/desynchronize/{{ dataset.id }}" method="POST">
+                <button type="submit" class="btn btn-warning mt-3" style="border-radius: 5px;">
+                    <i data-feather="x-circle" class="center-button-icon"></i>
+                    Desincronizar
+                </button>
+            </form>
+        {% else %}
+            <!-- Si no tiene DOI, está desincronizado, mostramos el botón de sincronización -->
+            <form action="/dataset/synchronize/{{ dataset.id }}" method="POST">
+                <button type="submit" class="btn btn-primary mt-3" style="border-radius: 5px;">
+                    <i data-feather="check-circle" class="center-button-icon"></i>
+                    Synchronize
+                </button>
+            </form>
+            <form action="/dataset/delete/{{ dataset.id }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres borrar este dataset? Esta acción no se puede deshacer.');">
+                <button type="submit" class="btn btn-danger mt-3" style="border-radius: 5px;">
+                    <i data-feather="trash-2" class="center-button-icon"></i>
+                    Delete
+                </button>
+            </form>
+            
+        {% endif %}
+        
     </div>
+    
     
 </div>
 

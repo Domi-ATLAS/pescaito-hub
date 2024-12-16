@@ -7,9 +7,8 @@
     <h1 class="h3 mb-3">My datasets</h1>
 
     {% if datasets %}
-        <div class=" col-12">
+        <div class="col-12">
             <div class="card">
-
                 <div class="card-body">
                     <table class="table">
                         <thead>
@@ -46,9 +45,7 @@
                         </tbody>
                     </table>
                 </div>
-
             </div>
-
         </div>
     {% else %}
         <div class="col-12 col-md-6">
@@ -68,8 +65,6 @@
     {% endif %}
 
     <div class="row">
-
-
         <div class="col-12">
             {% if local_datasets %}
                 <div class="card">
@@ -77,36 +72,48 @@
                         <div class="card-header">
                             <h5 class="card-title">Unsynchronized datasets</h5>
                         </div>
+    
+                        <!-- Botón para seleccionar feature models y crear un nuevo dataset -->
+                        <div class="mt-3 mb-3">
+                            <a href="{{ url_for('dataset.select_models') }}" class="btn btn-success">Select Feature Models to Create Dataset</a>
+                        </div>
+    
                         <div class="card-body">
                             <table class="table">
                                 <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Description</th>
-                                    <th>Publication type</th>
-                                    <th>Options</th>
-                                </tr>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Publication type</th>
+                                        <th>Dataset DOI</th> <!-- Nueva columna -->
+                                        <th>Options</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {% for local_dataset in local_datasets %}
-                                    <tr>
-                                        <td>
-                                            <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
-                                                {{ local_dataset.ds_meta_data.title }}
-                                            </a>
-                                        </td>
-                                        <td>{{ local_dataset.ds_meta_data.description }}</td>
-                                        <td>{{ local_dataset.ds_meta_data.publication_type.name.replace('_', ' ').title() }}</td>
-                                        <td>
-                                            <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
-                                                <i data-feather="eye"></i>
-                                            </a>
-                                            <a href="{{ url_for('dataset.download_dataset', dataset_id=local_dataset.id) }}">
-                                                <i data-feather="download"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                    {% for local_dataset in local_datasets %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
+                                                    {{ local_dataset.ds_meta_data.title }}
+                                                </a>
+                                            </td>
+                                            <td>{{ local_dataset.ds_meta_data.description }}</td>
+                                            <td>{{ local_dataset.ds_meta_data.publication_type.name.replace('_', ' ').title() }}</td>
+                                            <td>
+                                                <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
+                                                    {{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id, _external=True) }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
+                                                    <i data-feather="eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('dataset.download_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
+                                                    <i data-feather="download"></i>
+                                                </a>
+                                            </td>                                            
+                                        </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
@@ -114,5 +121,7 @@
                 </div>
             {% endif %}
         </div>
+    </div>
+    
 
 {% endblock %}

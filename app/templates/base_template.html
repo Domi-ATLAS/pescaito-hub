@@ -57,7 +57,11 @@ chico sundermann">
                         <i class="align-middle" data-feather="home"></i> <span class="align-middle">Home</span>
                     </a>
                 </li>
-
+                <li class="sidebar-item {{ 'active' if request.endpoint == 'dashboard.index' else '' }}">
+                    <a class="sidebar-link" href="{{ url_for('dashboard.index') }}">
+                        <i class="align-middle" data-feather="bar-chart-2"></i> <span class="align-middle">Dashboard</span>
+                    </a>                                              
+                </li>             
                 <li class="sidebar-item {{ 'active' if request.endpoint == 'explore.index' else '' }}">
                     <a class="sidebar-link" href="{{ url_for('explore.index') }}">
                         <i class="align-middle" data-feather="search"></i> <span class="align-middle">Explore</span>
@@ -113,7 +117,7 @@ chico sundermann">
                     <li class="sidebar-header">
                         Options
                     </li>
-
+                    
                     <li class="sidebar-item {{ 'active' if request.endpoint == 'profile.edit_profile' else '' }}">
                         <a class="sidebar-link" href="{{ url_for('profile.edit_profile') }}">
                             <i class="align-middle" data-feather="user"></i> <span
@@ -178,6 +182,8 @@ chico sundermann">
                                 <i class="align-middle me-1" data-feather="user"></i> My profile</a>
                             <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
                                 <i class="align-middle me-1" data-feather="log-out"></i> Log out</a>
+                                <a class="dropdown-item" href="{{ url_for('auth.reset_password_static') }}">
+                                    <i class="align-middle me-1" data-feather="lock"></i> Change my password</a>
                         </div>
                         
                         

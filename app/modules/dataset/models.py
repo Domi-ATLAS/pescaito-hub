@@ -63,6 +63,7 @@ class DSMetaData(db.Model):
     publication_doi = db.Column(db.String(120))
     dataset_doi = db.Column(db.String(120))
     tags = db.Column(db.String(120))
+    rating = db.Column(db.Float)
     ds_metrics_id = db.Column(db.Integer, db.ForeignKey('ds_metrics.id'))
     ds_metrics = db.relationship('DSMetrics', uselist=False, backref='ds_meta_data', cascade="all, delete")
     authors = db.relationship('Author', backref='ds_meta_data', lazy=True, cascade="all, delete")
@@ -75,9 +76,13 @@ class DataSet(db.Model):
     ds_meta_data_id = db.Column(db.Integer, db.ForeignKey('ds_meta_data.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+    numRatings = db.Column(db.Integer, default = 0)
+    totalRatings = db.Column(db.Float, default = 0.0)
+    avgRating = db.Column(db.Float, default = 0.0)
+
     ds_meta_data = db.relationship('DSMetaData', backref=db.backref('data_set', uselist=False))
     feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="all, delete")
-
+    ratings = db.relationship('Rate', backref='dataset', lazy=True, cascade="all, delete")  
     def name(self):
         return self.ds_meta_data.title
 
@@ -131,6 +136,9 @@ class DataSet(db.Model):
             'files_count': self.get_files_count(),
             'total_size_in_bytes': self.get_file_total_size(),
             'total_size_in_human_format': self.get_file_total_size_for_human(),
+            'numRatings': self.numRatings,
+            'totalRatings': self.totalRatings,
+            'avgRating': self.avgRating
         }
 
     def __repr__(self):
@@ -168,3 +176,12 @@ class DOIMapping(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dataset_doi_old = db.Column(db.String(120))
     dataset_doi_new = db.Column(db.String(120))
+
+
+class Rate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('data_set.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    rating = db.Column(db.Integer, default=0)
+
+    user = db.relationship('User', backref='ratings')
