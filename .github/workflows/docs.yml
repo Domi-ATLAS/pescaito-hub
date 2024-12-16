@@ -6,6 +6,9 @@ on:
       - develop  # Detectar cambios en develop
   workflow_dispatch:  # Permitir ejecución manual
 
+permissions:
+  contents: write  # Asegurar permisos de escritura
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
@@ -36,14 +39,14 @@ jobs:
       # 5. Desplegar la documentación en features/workflows
       - name: Deploy documentation to feature/workflows
         env:
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git fetch origin
-          git checkout feature/workflows
-          git pull origin feature/workflows
+          git checkout features/workflows
+          git pull origin features/workflows
           cp -r docs/build/html/* docs/  # Mover la documentación generada a docs/
           git add -f docs/build/*
-          git commit -m "docs(documentación): Documentación actualizada commit automatico [skip ci]" || echo "No changes to commit"
-          git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/pescaito-team/pescaito-hub.git HEAD:features/workflows
+          git commit -m "docs(documentación): Documentación actualizada commit automático [skip ci]" || echo "No changes to commit"
+          git push origin features/workflows
