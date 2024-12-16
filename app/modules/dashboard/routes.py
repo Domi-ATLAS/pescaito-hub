@@ -1,4 +1,4 @@
-from flask import Blueprint, make_response, render_template, current_app
+from flask import make_response, render_template, current_app
 from flask_login import current_user, login_required
 from app.modules.dataset.services import DataSetService
 from app.modules.featuremodel.services import FeatureModelService
@@ -10,9 +10,7 @@ from flask_login import login_required, current_user
 import os
 
 
-dashboard_bp = Blueprint('dashboard', __name__, template_folder='templates', url_prefix='/dashboard')
-
-@dashboard_bp.route('/', methods=['GET', 'POST'])
+@dashboard_bp.route('/dashboard', methods=['GET', 'POST'])
 def index():
     dataset_service = DataSetService()
     feature_model_service = FeatureModelService()
@@ -60,7 +58,7 @@ def index():
 
 
 
-@dashboard_bp.route('/export_user_summary', methods=['GET'])
+@dashboard_bp.route('/dashboard/export_user_summary', methods=['GET'])
 @login_required
 def export_user_summary():
     dataset_service = DataSetService()
