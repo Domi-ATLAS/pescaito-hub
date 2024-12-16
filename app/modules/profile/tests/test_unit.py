@@ -4,6 +4,9 @@ from app import db
 from app.modules.conftest import login, logout
 from app.modules.auth.models import User
 from app.modules.profile.models import UserProfile
+from app.modules.dataset.models import DataSet, DSMetaData
+from datetime import datetime
+from app.modules.dataset.models import PublicationType
 
 
 @pytest.fixture(scope="module")
@@ -36,3 +39,15 @@ def test_edit_profile_page_get(test_client):
     assert b"Edit profile" in response.data, "The expected content is not present on the page"
 
     logout(test_client)
+
+def test_view_profile_page_get(test_client):
+    """
+    Tests access to the profile viewing page via a GET request.
+    """
+    login_response = login(test_client, "user@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    response = test_client.get("/profile/1")
+    assert response.status_code == 200, "The profile viewing page could not be accessed."
+    assert b"Name" in response.data, "The expected content is not present on the page"
+    assert b"Surname" in response.data, "The expected content is not present on the page"

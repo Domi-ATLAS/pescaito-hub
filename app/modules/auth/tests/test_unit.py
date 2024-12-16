@@ -147,38 +147,54 @@ def test_recover_password_route(test_client):
 
 
 def test_recover_password_invalid_email(test_client):
-    # Enviar un email inválido
     response = test_client.post(
-        "/recover_password",  # La URL que se está probando
-        data=dict(email="invalidemail.com"),  # Email no válido
-        follow_redirects=True  # Seguir la redirección si es necesario
+        "/recover_password",  
+        data=dict(email="invalidemail.com"), 
+        follow_redirects=True  
     )
-
-    # Comprobar que el mensaje de error de email inválido está presente
     assert b'Please enter a valid email address.' in response.data
 
 def test_recover_password_invalid_email_too_long(test_client):
-    # Enviar un email inválido
     response = test_client.post(
-        "/recover_password",  # La URL que se está probando
-        data=dict(email="invalidemailithmorethan20characters.com"),  # Email no válido
-        follow_redirects=True  # Seguir la redirección si es necesario
+        "/recover_password", 
+        data=dict(email="invalidemailithmorethan20characters.com"),  
+        follow_redirects=True  
     )
-
-    # Comprobar que el mensaje de error de email inválido está presente
     assert b'Email must be between 6 and 20 characters.' in response.data
 
 
 def test_recover_password_invalid_email_with_point_bad(test_client):
-    # Enviar un email inválido
     response = test_client.post(
-        "/recover_password",  # La URL que se está probando
-        data=dict(email="fakeemail.@com"),  # Email no válido
-        follow_redirects=True  # Seguir la redirección si es necesario
+        "/recover_password",  
+        data=dict(email="fakeemail.@com"),  
+        follow_redirects=True  
     )
 
-    # Comprobar que el mensaje de error de email inválido está presente
+
     assert b'Email is invalid.' in response.data
+
+def test_change_password_bad(test_client):
+    response = test_client.post(
+        "/reset-password-static",  
+        data=dict(email="fakeemail.@com", new_password="newpassword123"),  
+        follow_redirects=True  
+    )
+
+    assert b'No user found with that email' in response.data
+
+
+def test_change_password_good(test_client):
+    response = test_client.post(
+        "/reset-password-static",  
+        data=dict(email="user1@example.com", new_password="12345"),  
+        follow_redirects=False  
+    )
+
+    assert response.status_code == 200  
+    
+
+
+
 
 # def test_reset_password_route(test_client):
 #     email = "test@example.com"

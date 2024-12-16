@@ -12,3 +12,7 @@ class UserProfileService(BaseService):
             return updated_instance, None
 
         return None, form.errors
+    
+    @staticmethod
+    def get_by_id(user_id):
+        return UserProfileRepository().get_by_id(user_id)
