@@ -54,3 +54,21 @@ def test_filter_error_handling(explore_service, mock_repository):
 
     with pytest.raises(Exception, match="Database error"):
         explore_service.filter(query="example")
+
+def test_filter_large_tags_list(explore_service, mock_repository):
+    """Prueba: Lista larga de tags."""
+    tags = [f"tag{i}" for i in range(100)]  # Lista de 100 tags
+    explore_service.filter(tags=tags)
+
+    mock_repository.filter.assert_called_once_with(
+        "", "newest", "any", tags, **{}
+    )
+
+def test_filter_empty_query_and_tags(explore_service, mock_repository):
+    """Prueba negativa: Query y tags vacíos."""
+    result = explore_service.filter(query="", tags=[])
+
+    assert result == mock_repository.filter.return_value
+    mock_repository.filter.assert_called_once_with(
+        "", "newest", "any", [], **{}
+    )
