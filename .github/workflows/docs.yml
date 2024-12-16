@@ -44,9 +44,9 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git fetch origin
-          git checkout features/workflows
-          git pull origin features/workflows
+          git checkout feature/workflows
+          git pull origin feature/workflows
           cp -r docs/build/html/* docs/  # Mover la documentación generada a docs/
           git add -f docs/build/*
           git commit -m "docs(documentación): Documentación actualizada commit automático [skip ci]" || echo "No changes to commit"
-          git push origin features/workflows
+          git push origin feature/workflows
