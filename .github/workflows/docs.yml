@@ -3,7 +3,8 @@ name: Build and Deploy Documentation
 on:
   push:
     branches:
-      - develop  # Se ejecuta automáticamente con cada push a develop
+      - develop  # Detectar cambios en develop
+  workflow_dispatch:  # Permitir ejecución manual
 
 jobs:
   build-docs:
@@ -24,19 +25,25 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx sphinx-rtd-theme myst-parser
+          pip install sphinx sphinx-rtd-theme
 
       # 4. Construir la documentación con Sphinx
       - name: Build documentation
         working-directory: docs
         run: |
-          sphinx-build -b html ./source ./  # Generar la documentación directamente en /docs
+          make html
 
-      # 5. Hacer commit y push de la documentación generada
-      - name: Commit updated documentation
+      # 5. Desplegar la documentación en features/workflows
+      - name: Deploy documentation to features/workflows
+        env:
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          git fetch origin
+          git checkout features/workflows
+          git pull origin features/workflows
+          cp -r docs/build/html/* docs/  # Mover la documentación generada a docs/
           git add docs/*
-          git commit -m "docs(documentación): Documentación actualizada [skip ci]" || echo "No changes to commit"
-          git push origin develop
+          git commit -m "docs(documentación): Documentación actualizada commit automatico [skip ci]" || echo "No changes to commit"
+          git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/pescaito-team/pescaito-hub.git HEAD:features/workflows
