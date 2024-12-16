@@ -377,6 +377,12 @@ def subdomain_index(doi):
 def get_unsynchronized_dataset(dataset_id):
     dataset = dataset_service.get_unsynchronized_dataset(current_user.id, dataset_id)
 
+
+    if current_user.is_authenticated:
+        total_unsynchronized_datasets = dataset_service.count_unsynchronized_datasets(current_user.id)
+    else:
+        total_unsynchronized_datasets = 0
+    
     if not dataset:
         abort(404)
 
@@ -385,7 +391,9 @@ def get_unsynchronized_dataset(dataset_id):
     if not dataset.ds_meta_data.publication_doi:
         dataset.ds_meta_data.publication_doi = "N/A"
 
-    return render_template("dataset/view_dataset.html", dataset=dataset)
+    return render_template("dataset/view_dataset.html",
+                           dataset=dataset, 
+                           total_unsynchronized_datasets=total_unsynchronized_datasets)
 
 @dataset_bp.route('/dataset/unsynchronized/download/<int:dataset_id>', methods=['GET'])
 @login_required
