@@ -137,3 +137,6 @@ Para validar que la convención de commits es correcta:
 
 - **Política de Protección de la Rama `main`:**  
   La rama `main` debe estar protegida para que no se puedan hacer commits directos. Los cambios deben realizarse mediante pull requests revisados por otro miembro del equipo. Excepto cambios para documentos, o cambios generales necesarios. A no ser que sean commits directos del tipo docs, en ese caso, estan permitidos.
+
+- **HotFixes:**  
+  Para evitar un sobreuso de pull requests en modificaciones que no afectan a la funcionalidad, como por ejmplo las migraciones, se podrán realizar HotFixes mediante commits de tipo “fix”.
