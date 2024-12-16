@@ -2,8 +2,11 @@ name: Build and Push Docker Image
 
 on:
   push:
+    tags:
+      - 'v*'  
+  pull_request:
     branches:
-      - develop  # Se ejecuta cuando haces push en la rama "develop"
+      - main  
 
 jobs:
   build-and-push:
