@@ -12,6 +12,10 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    - name: Copy .env.example.vagrant to .env
+      run: |
+        cp ./vagrant/.env.vagrant.example .env
+
     - name: Navigate to /vagrant Directory
       working-directory: ./vagrant
       run: |
