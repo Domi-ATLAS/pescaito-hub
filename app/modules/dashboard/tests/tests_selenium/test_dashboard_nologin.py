@@ -1,46 +1,51 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
-def test_home_to_dashboard_scroll():
-    # Configuración inicial
-    driver = webdriver.Chrome()
-    base_url = "http://127.0.0.1:5000"  # Cambiar según el entorno
+class TestHomeToDashboardScroll:
+    def setup_method(self, method):
+        self.driver = webdriver.Chrome()
+        self.vars = {}
+        self.base_url = "http://localhost:5000"
 
-    # Paso 1: Acceder a la página principal (Home)
-    driver.get(base_url)
-    time.sleep(2)
-    print("Página de inicio (Home) cargada correctamente.")
+    def teardown_method(self, method):
+        self.driver.quit()
 
-    # Paso 2: Navegar al Dashboard desde Home
-    try:
-        dashboard_link = driver.find_element(By.LINK_TEXT, "Dashboard")  # Cambiar según el texto del enlace en Home
-        print("Haciendo clic en el enlace 'Dashboard'.")
-        dashboard_link.click()
+    def test_home_to_dashboard_scroll(self):
+        driver = self.driver
+
+        # Paso 1: Acceder a la página principal (Home)
+        driver.get(self.base_url)
         time.sleep(2)
-    except Exception as e:
-        print(f"No se encontró el enlace 'Dashboard' en la página Home: {e}")
-        driver.quit()
-        return
+        print("Página de inicio (Home) cargada correctamente.")
 
-    # Paso 3: Verificar redirección o realizar scroll en Dashboard
-    current_url = driver.current_url
-    if "/login" in current_url:
-        print("El acceso al Dashboard redirigió correctamente a la página de inicio de sesión.")
-    else:
-        print("No se redirigió al inicio de sesión. Realizando scroll en el Dashboard...")
+        # Paso 2: Navegar al Dashboard desde Home
+        try:
+            dashboard_link = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.LINK_TEXT, "Dashboard"))
+            )
+            print("Haciendo clic en el enlace 'Dashboard'.")
+            dashboard_link.click()
+        except Exception as e:
+            print(f"No se encontró el enlace 'Dashboard': {e}")
 
-        # Realizar scroll en la página del Dashboard
-        total_height = driver.execute_script("return document.body.scrollHeight")
-        scroll_step = 200  # Tamaño del desplazamiento en píxeles
-        current_scroll_position = 0
+        # Paso 3: Verificar redirección o realizar scroll en Dashboard
+        current_url = driver.current_url
+        if "/login" in current_url:
+            print("El acceso al Dashboard redirigió correctamente a la página de inicio de sesión.")
+        else:
+            print("No se redirigió al inicio de sesión. Realizando scroll en el Dashboard...")
 
-        while current_scroll_position < total_height:
-            driver.execute_script(f"window.scrollBy(0, {scroll_step});")
-            current_scroll_position += scroll_step
-            time.sleep(0.5)  # Scroll suave
+            # Realizar scroll en la página del Dashboard
+            total_height = driver.execute_script("return document.body.scrollHeight")
+            scroll_step = 200  # Tamaño del desplazamiento en píxeles
+            current_scroll_position = 0
 
-        print("Scroll completado en la página del Dashboard.")
+            while current_scroll_position < total_height:
+                driver.execute_script(f"window.scrollBy(0, {scroll_step});")
+                current_scroll_position += scroll_step
+                time.sleep(0.5)  # Scroll suave
 
-    # Finalizar el test
-    driver.quit()
+            print("Scroll completado en la página del Dashboard.")
