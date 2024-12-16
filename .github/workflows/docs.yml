@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop  # Ejecuta en cada push a develop
-  workflow_dispatch:  # Permite ejecución manual
 
 jobs:
   build-docs:
@@ -35,4 +34,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html
           publish_branch: develop
-          destination_dir: docs
+          destination_dir: docs/generated_docs
