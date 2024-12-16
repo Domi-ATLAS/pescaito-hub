@@ -34,15 +34,15 @@ jobs:
           make html
 
       # 5. Desplegar la documentación en features/workflows
-      - name: Deploy documentation to features/workflows
+      - name: Deploy documentation to feature/workflows
         env:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git fetch origin
-          git checkout features/workflows
-          git pull origin features/workflows
+          git checkout feature/workflows
+          git pull origin feature/workflows
           cp -r docs/build/html/* docs/  # Mover la documentación generada a docs/
           git add docs/*
           git commit -m "docs(documentación): Documentación actualizada commit automatico [skip ci]" || echo "No changes to commit"
