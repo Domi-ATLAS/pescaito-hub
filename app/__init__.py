@@ -79,6 +79,6 @@ def create_app(config_name='development'):
 
     return app
 
-# app = create_app() 
-# Esto es inicializado cuando Flask lo ejecute.
+app = create_app() 
+
 

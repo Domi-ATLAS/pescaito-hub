@@ -7,4 +7,8 @@ class ExploreService(BaseService):
         super().__init__(ExploreRepository())
 
     def filter(self, query="", sorting="newest", publication_type="any", tags=[], **kwargs):
+        valid_sorting = ["newest", "oldest"]
+        if sorting not in valid_sorting:
+            raise ValueError("Invalid sorting value")
+        
         return self.repository.filter(query, sorting, publication_type, tags, **kwargs)
