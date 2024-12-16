@@ -1,5 +1,4 @@
-from io import BytesIO
-from flask import make_response, render_template, current_app
+from flask import Blueprint, make_response, render_template, current_app
 from flask_login import current_user, login_required
 from app.modules.dataset.services import DataSetService
 from app.modules.featuremodel.services import FeatureModelService
@@ -9,8 +8,9 @@ from flask import render_template, make_response
 from flask_weasyprint import HTML
 from flask_login import login_required, current_user
 import os
-from core.blueprints.base_blueprint import BaseBlueprint
 
+
+dashboard_bp = Blueprint('dashboard', __name__, template_folder='templates', url_prefix='/dashboard')
 
 @dashboard_bp.route('/', methods=['GET', 'POST'])
 def index():
