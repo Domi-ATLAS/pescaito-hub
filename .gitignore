@@ -1,3 +1,6 @@
+# Permitir docs/build
+!docs/build
+
 .env
 __pycache__/
 .idea
