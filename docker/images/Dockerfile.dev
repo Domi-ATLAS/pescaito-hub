@@ -56,3 +56,6 @@ RUN pip install -e ./
 
 # Expose port 5000 for the Flask app
 EXPOSE 5000
+
+# Ejecutar comandos de migración y seed al iniciar el contenedor
+CMD ["sh", "-c", "./scripts/wait-for-db.sh && flask db upgrade && rosemary db:seed && flask run --host=0.0.0.0"]

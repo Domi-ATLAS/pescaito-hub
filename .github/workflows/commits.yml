@@ -1,18 +1,45 @@
-name: Commits Syntax Checker
+name: Validar commits en develop
 
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, reopened, edited, review_requested, synchronize]
   push:
     branches:
-      - "main"
-  workflow_call:
+      - develop
 
 jobs:
-  check:
-    name: Conventional Commits
+  validar-commits:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: webiny/action-conventional-commits@v1.0.3
+      - name: Checkout del código
+        uses: actions/checkout@v2
+
+      - name: Obtener commits del push
+        run: |
+          # Actualizar la rama develop desde remoto
+          git fetch origin develop
+      
+          # Obtener los commits realizados en el push
+          commits=$(git log origin/develop..HEAD --oneline)
+          echo "Commits realizados en el push:"
+          echo "$commits"
+      
+          # Validar cada commit
+          if [ -z "$commits" ]; then
+            echo "No hay commits nuevos en el rango especificado."
+            exit 0
+          fi
+      
+          while IFS= read -r commit; do
+            mensaje=$(echo "$commit" | awk '{$1=""; print $0}' | xargs)
+            
+            if ! echo "$mensaje" | grep -Eq '^(feat|fix|docs|style|refactor|test|chore|perf|build|ci)\([a-zA-Z0-9 _-]+\):\ .+'; then
+              echo "Error: El mensaje de commit no sigue el formato esperado."
+              echo "Formato esperado: <tipo>(<módulo>): <descripción>"
+              echo "Ejemplo válido: fix(workflows): Corrección en el pipeline de CI"
+              echo "Mensaje actual: '$mensaje'"
+              exit 1
+            fi
+          done <<< "$commits"
+      
+          echo "Todos los mensajes de commit cumplen con el formato esperado."
+      
