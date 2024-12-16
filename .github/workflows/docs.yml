@@ -3,35 +3,50 @@ name: Build and Deploy Documentation
 on:
   push:
     branches:
-      - features/workflows  # Cambia según tu rama
-  workflow_dispatch:  # Para ejecutarlo manualmente
+      - develop  # Detectar cambios en develop
+  workflow_dispatch:  # Permitir ejecución manual
+
+permissions:
+  contents: write  # Asegurar permisos de escritura
 
 jobs:
   build-docs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v3
+      # 1. Descargar el repositorio
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12.3'
+      # 2. Configurar Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.3'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install sphinx sphinx-rtd-theme
+      # 3. Instalar dependencias de Sphinx
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install sphinx sphinx-rtd-theme myst-parser
 
-    - name: Build documentation
-      working-directory: docs
-      run: |
-        make html
+      # 4. Construir la documentación con Sphinx
+      - name: Build documentation
+        working-directory: docs
+        run: |
+          make html
 
-    - name: Deploy to GitHub Pages
-      if: ${{ github.ref == 'refs/heads/features/workflows' }}
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/build/html
+      # 5. Desplegar la documentación en features/workflows
+      - name: Deploy documentation to feature/workflows
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git fetch origin
+          git checkout feature/workflows
+          git pull origin feature/workflows
+          cp -r docs/build/html/* docs/  # Mover la documentación generada a docs/
+          git add -f docs/build/*
+          git commit -m "docs(documentación): Documentación actualizada commit automático [skip ci]" || echo "No changes to commit"
+          git push origin feature/workflows

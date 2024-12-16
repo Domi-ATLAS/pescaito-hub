@@ -67,6 +67,7 @@ def update_rating(dataset_id, rating):
 def create_dataset():
     form = DataSetForm()
     if request.method == "POST":
+
         dataset = None
 
         if not form.validate_on_submit():
@@ -74,55 +75,94 @@ def create_dataset():
 
         try:
             logger.info("Creating dataset...")
+            # Aquí se crea el objeto 'dataset'
             dataset = dataset_service.create_from_form(form=form, current_user=current_user)
             logger.info(f"Created dataset: {dataset}")
+
+            # Usamos el método name() para obtener el nombre
+            dataset_name = dataset.name()  # Aquí estamos obteniendo el 'title' del modelo DSMetaData
+            if not dataset_name:
+                logger.error("Dataset title is missing")
+                return jsonify({"error": "Dataset title is required"}), 400
+
+            logger.info(f"Dataset Name: {dataset_name}")
+
             dataset_service.move_feature_models(dataset)
         except Exception as exc:
-            logger.exception(f"Exception while creating dataset data locally {exc}")
-            return jsonify({"Exception while creating dataset data locally: ": str(exc)}), 400
+            logger.exception(f"Exception while creating dataset data in local {exc}")
+            return jsonify({"Exception while creating dataset data in local: ": str(exc)}), 400
 
-        # Send dataset as deposition to Zenodo
-        data = {}
+        # Ahora pasamos el objeto 'dataset' en lugar de 'dataset_bp'
         try:
-            zenodo_response_json = zenodo_service.create_new_deposition(dataset)
-            response_data = json.dumps(zenodo_response_json)
-            data = json.loads(response_data)
+            deposition_id, deposition_dir, metadata = dataset_service.create_local_deposition(dataset)
+            
+            # Aquí aseguramos que 'metadata' no contenga métodos, sino solo valores serializables
+            metadata["dataset_name"] = dataset_name  # Correcto, asegurándonos de pasar solo el valor del 'title'
+
+            # Asegúrate de que 'metadata' solo contenga datos serializables en JSON
+            logger.info(f"Metadata before saving: {metadata}")
+
+            # Aquí pasamos correctamente los metadatos a JSON
+            with open("metadata.json", "w") as f:
+                json.dump(metadata, f)  # Esto debe funcionar ahora si 'metadata' es un diccionario serializable
+
         except Exception as exc:
-            data = {}
-            zenodo_response_json = {}
-            logger.exception(f"Exception while creating dataset data in Zenodo {exc}")
+            logger.exception(f"Error while creating local deposition: {exc}")
+            return jsonify({"message": "Error during local deposition creation"}), 500
+        
+        # El resto del código sigue igual
 
-        if data.get("conceptrecid"):
-            deposition_id = data.get("id")
-
-            # Update dataset with deposition id in Zenodo
-            dataset_service.update_dsmetadata(dataset.ds_meta_data_id, deposition_id=deposition_id)
-
-            try:
-                # Iterate for each feature model (one feature model = one request to Zenodo)
-                for feature_model in dataset.feature_models:
-                    zenodo_service.upload_file(dataset, deposition_id, feature_model)
-
-                # Publish deposition
-                zenodo_service.publish_deposition(deposition_id)
-
-                # Update DOI
-                deposition_doi = zenodo_service.get_doi(deposition_id)
-                dataset_service.update_dsmetadata(dataset.ds_meta_data_id, dataset_doi=deposition_doi)
-            except Exception as e:
-                msg = f"It has not been possible to upload feature models to Zenodo and update the DOI: {e}"
-                return jsonify({"message": msg}), 200
-
-        # Delete temp folder
-        file_path = current_user.temp_folder()
-        if os.path.exists(file_path) and os.path.isdir(file_path):
-            shutil.rmtree(file_path)
-
-        msg = "Everything works!"
-        return jsonify({"message": msg}), 200
+        return jsonify({"message": "Everything works!"}), 200
 
     return render_template("dataset/upload_dataset.html", form=form)
 
+@dataset_bp.route('/dataset/synchronize/<int:dataset_id>', methods=["POST"])
+@login_required
+def synchronize_dataset(dataset_id):
+    try:
+        # Sincroniza el dataset
+        dataset_service.set_synchronized(dataset_id)
+        # Redirige a la lista de datasets
+        return redirect(url_for("dataset.list_dataset"))
+    except Exception as e:
+        # Manejo de errores
+        logger.error(f"Error while synchronizing dataset: {e}")
+        return f"Error: {e}", 500
+
+@dataset_bp.route('/dataset/desynchronize/<int:dataset_id>', methods=["POST"])
+@login_required
+def desynchronize_dataset(dataset_id):
+    try:
+        # Desincroniza el dataset
+        dataset_service.set_unsynchronized(dataset_id)
+
+        # Redirige a la lista de datasets
+        return redirect(url_for("dataset.list_dataset"))
+    except Exception as e:
+        # Manejo de errores
+        logger.error(f"Error while desynchronizing dataset: {e}")
+        return f"Error: {e}", 500
+    
+@dataset_bp.route('/dataset/delete/<int:dataset_id>', methods=["POST"])
+@login_required
+def delete_dataset(dataset_id):
+    try:
+        # Llama al servicio para eliminar el dataset
+        dataset = dataset_service.get_or_404(dataset_id)
+
+        # Verificamos que el usuario que está intentando eliminar el dataset sea el dueño
+        if dataset.user_id != current_user.id:
+            return jsonify({"error": "No tienes permiso para eliminar este dataset"}), 403
+        
+        # Elimina el dataset
+        dataset_service.delete(dataset_id)
+        
+        # Si la eliminación fue exitosa, redirige a la lista de datasets
+        return redirect(url_for('dataset.list_dataset'))
+
+    except Exception as e:
+        logger.error(f"Error while deleting dataset {dataset_id}: {e}")
+        return jsonify({"message": "Error al eliminar el dataset"}), 500
 
 @dataset_bp.route("/dataset/list", methods=["GET", "POST"])
 @login_required
@@ -377,6 +417,12 @@ def subdomain_index(doi):
 def get_unsynchronized_dataset(dataset_id):
     dataset = dataset_service.get_unsynchronized_dataset(current_user.id, dataset_id)
 
+
+    if current_user.is_authenticated:
+        total_unsynchronized_datasets = dataset_service.count_unsynchronized_datasets(current_user.id)
+    else:
+        total_unsynchronized_datasets = 0
+    
     if not dataset:
         abort(404)
 
@@ -385,7 +431,9 @@ def get_unsynchronized_dataset(dataset_id):
     if not dataset.ds_meta_data.publication_doi:
         dataset.ds_meta_data.publication_doi = "N/A"
 
-    return render_template("dataset/view_dataset.html", dataset=dataset)
+    return render_template("dataset/view_dataset.html",
+                           dataset=dataset, 
+                           total_unsynchronized_datasets=total_unsynchronized_datasets)
 
 @dataset_bp.route('/dataset/unsynchronized/download/<int:dataset_id>', methods=['GET'])
 @login_required
