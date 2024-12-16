@@ -9,7 +9,6 @@ from flask import render_template, make_response
 from flask_weasyprint import HTML
 from flask_login import login_required, current_user
 import os
-
 from core.blueprints.base_blueprint import BaseBlueprint
 
 dashboard_bp = BaseBlueprint('dashboard', __name__, template_folder='templates')
