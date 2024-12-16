@@ -10,9 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
     curl \
     bash \
-    openrc \
     build-essential \
-    libgobject-2.0-dev \
+    libgirepository1.0-dev \
+    gir1.2-glib-2.0 \
     libglib2.0-dev \
     libpango-1.0-0 \
     libcairo2 \
