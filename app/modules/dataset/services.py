@@ -346,10 +346,17 @@ class DataSetService(BaseService):
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
     
+
+    def get_profile(self, dataset):
+        user_profile = dataset.user.profile
+        domain = os.getenv('DOMAIN', 'localhost')
+        return f'http://{domain}/profile/{user_profile.user_id}'
+
     def count_unsynchronized_datasets(self, current_user_id: int) -> int:
         unsynchronized_datasets = self.get_unsynchronized(current_user_id)
         return len(unsynchronized_datasets) if unsynchronized_datasets else 0
     
+
 
 
 
