@@ -94,7 +94,7 @@
                                         <tr>
                                             <td>
                                                 <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
-                                                    Dataset de modelos seleccionados {{ local_dataset.id }}
+                                                    {{ local_dataset.ds_meta_data.title }}
                                                 </a>
                                             </td>
                                             <td>{{ local_dataset.ds_meta_data.description }}</td>
