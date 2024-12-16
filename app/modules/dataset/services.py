@@ -12,6 +12,8 @@ from flask import request
 from app import db  
 from flask_login import current_user
 
+from datetime import datetime	
+import json 
 
 from app import db
 from app.modules.auth.services import AuthenticationService
@@ -32,6 +34,7 @@ from app.modules.hubfile.repositories import (
 )
 from core.services.BaseService import BaseService
 from flask import session
+
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +74,8 @@ class DataSetService(BaseService):
             uvl_filename = feature_model.fm_meta_data.uvl_filename
             shutil.move(os.path.join(source_dir, uvl_filename), dest_dir)
 
+    
+
     def get_dataset_by_id(self, dataset_id: int) -> Optional[DataSet]:
         dataset = self.repository.get_by_id(dataset_id)
         if not dataset:
@@ -107,6 +112,158 @@ class DataSetService(BaseService):
         
         return dataset
         
+
+
+    def create_local_deposition(self, dataset: DataSet):
+        # Aquí se asume que 'dataset' ya contiene los datos necesarios para 'metadata'
+        
+        deposition_id = None
+        deposition_dir = None
+        metadata = None
+
+        # Generación de DOI
+        dataset_doi = f"10.1234/{uuid.uuid4()}"
+
+        # Asignación de los datos de metadata
+        metadata = {
+            "title": dataset.ds_meta_data.title,
+            "description": dataset.ds_meta_data.description,
+            "publication_type": dataset.ds_meta_data.publication_type.name,
+            "publication_doi": dataset.ds_meta_data.publication_doi,
+            "dataset_doi": dataset_doi,
+            "tags": dataset.ds_meta_data.tags,
+        }
+
+        # Agregar log para verificar el contenido de 'metadata'
+        logger.info(f"Metadata before saving: {metadata}")
+
+        # Ahora actualizamos la metadata en la base de datos
+        try:
+            # Asignamos el DOI a la metadata en la base de datos
+            dataset.ds_meta_data.dataset_doi = dataset_doi
+            
+            # Guardamos la metadata en la base de datos
+            self.dsmetadata_repository.update(dataset.ds_meta_data.id, dataset_doi=dataset_doi)
+
+            # Guardamos el archivo de metadata como JSON
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            unique_id = uuid.uuid4().hex[:8]
+            filename = f"Deposition_{timestamp}_{unique_id}.json"
+
+            # Crear y escribir el archivo
+            with open(filename, "w") as f:
+                json.dump(metadata, f)
+            logger.info(f"Metadata successfully written to {filename}")
+
+        except Exception as e:
+            logger.error(f"Error serializing or saving metadata: {e}")
+            raise
+
+        return deposition_id, deposition_dir, metadata
+
+    def upload_files_locally(self, dataset, deposition_dir):
+        # Aquí subimos (guardamos) los archivos locales, como modelos de características
+        for feature_model in dataset.feature_models:
+            # Supongamos que `feature_model` es una ruta al archivo
+            file_path = feature_model.path
+            shutil.copy(file_path, os.path.join(deposition_dir, os.path.basename(file_path)))
+        
+        # Actualizamos la metadata con los archivos subidos
+        for file in os.listdir(deposition_dir):
+            if file != "metadata.json":
+                metadata["files"].append(file)
+
+    def publish_local_deposition(self, deposition_id, deposition_dir):
+        # Simplemente hacemos que el "depósito" esté listo para distribución
+        # En un escenario real, podrías mover los archivos a una ubicación pública
+        pass
+
+    def assign_local_doi(self, deposition_id, deposition_dir):
+        # Asignamos un DOI local utilizando un formato simulado
+        doi = f"10.1234/{deposition_id}"
+        metadata["doi"] = doi
+        
+        # Guardamos el DOI en la metadata
+        with open(os.path.join(deposition_dir, "metadata.json"), "w") as f:
+            json.dump(metadata, f)
+        
+        return doi
+
+
+    def set_synchronized(self, dataset_id: int):
+        # Obtén el dataset por su ID
+        dataset = self.get_dataset_by_id(dataset_id)
+        
+        if dataset.ds_meta_data.dataset_doi:
+            raise ValueError("Este dataset ya está sincronizado")
+
+        if dataset.user_id != current_user.id:
+            raise ValueError("No puedes sincronizar un dataset que no te pertenece")
+
+
+        if not dataset:
+            raise ValueError("Dataset no encontrado")
+
+        # Asignar un DOI al dataset (suponemos que lo generas o lo recuperas)
+        dataset_doi = f"10.1234/{uuid.uuid4()}"  # Ejemplo de generación de DOI
+        # Actualiza el dataset_doi en DSMetaData
+        dataset.ds_meta_data.dataset_doi = dataset_doi
+        
+        # Guarda los cambios
+        self.repository.session.commit()
+        return dataset
+
+
+    def set_unsynchronized(self, dataset_id: int):
+        # Obtén el dataset por su ID
+        dataset = self.get_dataset_by_id(dataset_id)
+        
+        if not dataset.ds_meta_data.dataset_doi:
+            raise ValueError("Este dataset ya está desincronizado")
+
+        if dataset.user_id != current_user.id:
+            raise ValueError("No puedes desincronizar un dataset que no te pertenece")
+
+        if not dataset:
+            raise ValueError("Dataset no encontrado")
+
+        # Eliminar el DOI para marcarlo como no sincronizado
+        dataset.ds_meta_data.dataset_doi = None
+        
+        # Guarda los cambios
+        self.repository.session.commit()
+        return dataset    
+    
+    def delete(self, dataset_id: int) -> bool:
+        """
+        Elimina el dataset y sus registros relacionados (vistas, descargas),
+        pero solo si el dataset está desincronizado (sin DOI).
+        """
+        try:
+            # Obtener el dataset por ID
+            dataset = self.get_dataset_by_id(dataset_id)
+
+            # Verificar si el dataset existe
+            if not dataset:
+                raise ValueError(f"Dataset con ID {dataset_id} no encontrado.")
+
+            # Verificar si el dataset está sincronizado (si tiene un DOI asignado)
+            if dataset.ds_meta_data.dataset_doi:
+                raise ValueError(f"El dataset con ID {dataset_id} está sincronizado y no puede eliminarse.")
+
+            # Llamar al repositorio para eliminar el dataset
+            if self.repository.delete_by_id(dataset_id):
+                logger.info(f"Dataset con ID {dataset_id} eliminado exitosamente.")
+                return True
+            else:
+                logger.error(f"No se pudo eliminar el dataset con ID {dataset_id}.")
+                return False
+
+        except Exception as e:
+            logger.error(f"Error al eliminar el dataset con ID {dataset_id}: {e}")
+            return False
+
+
 
     def get_synchronized(self, current_user_id: int) -> DataSet:
         return self.repository.get_synchronized(current_user_id)

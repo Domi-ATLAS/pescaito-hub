@@ -427,7 +427,35 @@
             <i data-feather="download" class="center-button-icon"></i>
             Download all ({{ dataset.get_file_total_size_for_human() }})
         </a>
+
+        
+        {% if dataset.ds_meta_data.dataset_doi %}
+            <!-- Si tiene DOI, está sincronizado, mostramos el botón de desincronización -->
+            <form action="/dataset/desynchronize/{{ dataset.id }}" method="POST">
+                <button type="submit" class="btn btn-warning mt-3" style="border-radius: 5px;">
+                    <i data-feather="x-circle" class="center-button-icon"></i>
+                    Desincronizar
+                </button>
+            </form>
+        {% else %}
+            <!-- Si no tiene DOI, está desincronizado, mostramos el botón de sincronización -->
+            <form action="/dataset/synchronize/{{ dataset.id }}" method="POST">
+                <button type="submit" class="btn btn-primary mt-3" style="border-radius: 5px;">
+                    <i data-feather="check-circle" class="center-button-icon"></i>
+                    Synchronize
+                </button>
+            </form>
+            <form action="/dataset/delete/{{ dataset.id }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres borrar este dataset? Esta acción no se puede deshacer.');">
+                <button type="submit" class="btn btn-danger mt-3" style="border-radius: 5px;">
+                    <i data-feather="trash-2" class="center-button-icon"></i>
+                    Delete
+                </button>
+            </form>
+            
+        {% endif %}
+        
     </div>
+    
     
 </div>
 
