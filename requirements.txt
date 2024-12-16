@@ -86,7 +86,6 @@ python-sat==1.8.dev13
 pytz==2024.1
 pyzmq==26.0.3
 requests==2.32.3
--e git+ssh://git@github.com/Domi-ATLAS/pescaito-hub.git@2f970332e0df5e7ced32970bbf40f39d256b71da#egg=rosemary
 selenium==4.22.0
 selenium-wire==5.1.0
 setuptools==70.3.0
