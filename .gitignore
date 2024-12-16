@@ -1,5 +1,6 @@
-# Permitir docs/build
+# Permitir el directorio docs/build y su contenido
 !docs/build
+!docs/build/**
 
 .env
 __pycache__/
