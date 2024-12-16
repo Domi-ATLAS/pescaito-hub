@@ -8,7 +8,6 @@ from app.modules.profile.services import UserProfileService
 from app.modules.auth.models import User  # Asumimos que el modelo de Usuario está en auth.models
 from app import db
 
-# Configuración
 authentication_service = AuthenticationService()
 user_profile_service = UserProfileService()
 
@@ -56,7 +55,6 @@ def logout():
     logout_user()
     return redirect(url_for('public.index'))
 
-# Función para generar el token
 def generate_reset_token(email):
     s = Serializer(current_app.config['SECRET_KEY'])
     return s.dumps({'email': email})  # No necesitas `decode('utf-8')` en versiones modernas
@@ -69,7 +67,6 @@ def verify_reset_token(token):
         return None  # Token inválido o expirado
     return data.get('email')  # Devuelve el email contenido en el token
 
-# Función para enviar el correo con el enlace de recuperación
 def send_reset_email(user_email):
     token = generate_reset_token(user_email)
     reset_url = url_for('auth.reset_password', token=token, _external=True)  # El enlace para la recuperación
@@ -82,7 +79,6 @@ def send_reset_email(user_email):
     except Exception as e:
         print(f"Error al enviar el correo: {e}")
 
-# app/modules/auth/routes.py
 from flask import render_template, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user
 from app import mail  # Importar mail aquí, donde lo necesitamos
@@ -96,19 +92,17 @@ from flask_mail import Message  # Para enviar el correo
 authentication_service = AuthenticationService()
 user_profile_service = UserProfileService()
 
-# Ruta para recuperación de contraseña
 @auth_bp.route('/recover_password', methods=['GET', 'POST'])
 def recover_password():
     form = PasswordRecoveryForm()
 
     if form.validate_on_submit():
         email = form.email.data
-        user = User.query.filter_by(email=email).first()  # Busca el usuario en la BD
+        user = User.query.filter_by(email=email).first()  
         if not user:
             flash("No existe una cuenta asociada con ese correo", "error")
             return render_template("auth/recover_password_form.html", form=form)
 
-        # Genera el token y envía el correo
         try:
             token = generate_reset_token(email)
             reset_url = url_for('auth.reset_password', token=token, _external=True)
@@ -129,7 +123,7 @@ def recover_password():
     return render_template("auth/recover_password_form.html", form=form)
 
 
-# Función para verificar el token
+
 from werkzeug.security import generate_password_hash
 
 
@@ -145,12 +139,12 @@ def reset_password(token):
         flash('Usuario no encontrado', 'error')
         return redirect(url_for('auth.recover_password'))
 
-    # Crear una instancia del formulario
+    
     form = ResetPasswordForm()
 
-    if form.validate_on_submit():  # Validación de formulario usando Flask-WTF
+    if form.validate_on_submit(): 
         new_password = form.password.data
-        user.password = generate_password_hash(new_password)  # Encripta la contraseña
+        user.password = generate_password_hash(new_password)  
         db.session.commit()
         flash('Tu contraseña ha sido actualizada exitosamente.', 'success')
         return redirect(url_for('auth.login'))
@@ -173,7 +167,7 @@ def reset_password_static():
             return render_template('auth/reset_password_static.html')
 
         try:
-            user.password = generate_password_hash(new_password)  # Encripta la nueva contraseña
+            user.password = generate_password_hash(new_password)  
             db.session.commit()
             flash('Password updated successfully.', 'success')
             return redirect(url_for('auth.login'))
