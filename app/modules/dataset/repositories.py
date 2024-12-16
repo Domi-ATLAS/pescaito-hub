@@ -123,6 +123,35 @@ class DataSetRepository(BaseRepository):
             .all()
         )
     
+    def delete_by_id(self, dataset_id: int):
+        dataset = self.session.query(DataSet).filter(DataSet.id == dataset_id).first()
+        if dataset:
+            # Eliminar los registros relacionados (vistas, descargas)
+            self.delete_related_records(dataset)
+
+            # Eliminar el dataset
+            self.session.delete(dataset)
+            self.session.commit()
+
+            logger.info(f"Dataset {dataset_id} eliminado exitosamente de la base de datos.")
+            return True
+        return False
+
+    def delete_related_records(self, dataset: DataSet):
+        try:
+            # Eliminar registros de vistas
+            self.session.query(DSViewRecord).filter(DSViewRecord.dataset_id == dataset.id).delete()
+
+            # Eliminar registros de descargas
+            self.session.query(DSDownloadRecord).filter(DSDownloadRecord.dataset_id == dataset.id).delete()
+
+            # Aquí puedes agregar más eliminaciones si hay otros registros relacionados
+            self.session.commit()
+
+            logger.info(f"Registros relacionados con el dataset {dataset.id} eliminados correctamente.")
+        except Exception as e:
+            logger.error(f"Error al eliminar registros relacionados para el dataset {dataset.id}: {e}")
+            self.session.rollback()
     def latest_unsynchronized(self):
         return (
             self.model.query.join(DSMetaData)
@@ -131,6 +160,7 @@ class DataSetRepository(BaseRepository):
             .limit(5)  
             .all()
     )
+
 
 
 
