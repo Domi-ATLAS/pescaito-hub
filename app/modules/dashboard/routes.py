@@ -11,9 +11,8 @@ from flask_login import login_required, current_user
 import os
 from core.blueprints.base_blueprint import BaseBlueprint
 
-dashboard_bp = BaseBlueprint('dashboard', __name__, template_folder='templates')
 
-@dashboard_bp.route('/dashboard', methods=['GET', 'POST'])
+@dashboard_bp.route('/', methods=['GET', 'POST'])
 def index():
     dataset_service = DataSetService()
     feature_model_service = FeatureModelService()
@@ -61,7 +60,7 @@ def index():
 
 
 
-@dashboard_bp.route('/dashboard/export_user_summary', methods=['GET'])
+@dashboard_bp.route('/export_user_summary', methods=['GET'])
 @login_required
 def export_user_summary():
     dataset_service = DataSetService()
