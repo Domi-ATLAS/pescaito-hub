@@ -36,17 +36,10 @@ jobs:
         run: |
           make html
 
-      # 5. Desplegar la documentación en features/workflows
-      - name: Deploy documentation to feature/workflows
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git fetch origin
-          git checkout feature/workflows
-          git pull origin feature/workflows
-          cp -r docs/build/html/* docs/  # Mover la documentación generada a docs/
-          git add -f docs/build/*
-          git commit -m "docs(documentación): Documentación actualizada commit automático [skip ci]" || echo "No changes to commit"
-          git push origin feature/workflows
+      # 5. Desplegar la documentación en gh-pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html
+          publish_branch: gh-pages  # Desplegar en la rama gh-pages
