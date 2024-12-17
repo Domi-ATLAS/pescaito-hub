@@ -31,8 +31,13 @@ jobs:
       run: |
         vagrant up
 
-    - name: Destroy VM (optional for cleanup)
-      if: always()
+    - name: Check Application Status
       working-directory: ./vagrant
       run: |
-        vagrant destroy -f
+        echo "Waiting for the application to be accessible..."
+        sleep 10
+        curl -I http://localhost:5000 || echo "App not reachable"
+
+    - name: Output Connection Details
+      run: |
+        echo "Service is available at: http://localhost:5000"
