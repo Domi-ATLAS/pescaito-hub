@@ -36,9 +36,9 @@ class TestExplorePage(unittest.TestCase):
         dropdown = self.driver.find_element(By.ID, "publication_type")
         dropdown.find_element(By.XPATH, "//option[. = 'Data Management Plan']").click()
 
-        # Espera a que el elemento "Sample dataset 2" sea clickable
+        # Espera a que el elemento "Sample dataset 1" sea clickable
         element = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 2"))
+            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 1"))
         )
 
         # Desplazar la vista hasta el elemento si es necesario
@@ -51,11 +51,11 @@ class TestExplorePage(unittest.TestCase):
         
     def test_filter_by_author(self):
         dropdown = self.driver.find_element(By.ID, "authors")
-        dropdown.find_element(By.XPATH, "//option[. = 'Author 2']").click()
+        dropdown.find_element(By.XPATH, "//option[. = 'Author 1']").click()
 
-        # Espera a que el elemento "Sample dataset 2" sea clickable
+        # Espera a que el elemento "Sample dataset 1" sea clickable
         element = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 2"))
+            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 1"))
         )
 
         # Desplazar la vista hasta el elemento si es necesario
@@ -68,11 +68,11 @@ class TestExplorePage(unittest.TestCase):
 
     def test_filter_by_files(self):
         dropdown = self.driver.find_element(By.ID, "files")
-        dropdown.find_element(By.XPATH, "//option[. = '1 File']").click()
+        dropdown.find_element(By.XPATH, "//option[. = '3 Files']").click()
 
-        # Espera a que el elemento "Sample dataset 2" sea clickable
+        # Espera a que el elemento "Sample dataset 1" sea clickable
         element = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 2"))
+            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 1"))
         )
 
         # Desplazar la vista hasta el elemento si es necesario
@@ -85,11 +85,11 @@ class TestExplorePage(unittest.TestCase):
 
     def test_filter_by_size(self):
         dropdown = self.driver.find_element(By.ID, "size")
-        dropdown.find_element(By.XPATH, "//option[. = 'Less than 1KB']").click()
+        dropdown.find_element(By.XPATH, "//option[. = 'Between 1KB and 2KB']").click()
 
-        # Espera a que el elemento "Sample dataset 2" sea clickable
+        # Espera a que el elemento "Sample dataset 1" sea clickable
         element = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 2"))
+            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 1"))
         )
 
         # Desplazar la vista hasta el elemento si es necesario
@@ -102,11 +102,11 @@ class TestExplorePage(unittest.TestCase):
 
     def test_filter_by_title(self):
         dropdown = self.driver.find_element(By.ID, "title")
-        dropdown.find_element(By.XPATH, "//option[. = 'Sample dataset 2']").click()
+        dropdown.find_element(By.XPATH, "//option[. = 'Sample dataset 1']").click()
 
-        # Espera a que el elemento "Sample dataset 2" sea clickable
+        # Espera a que el elemento "Sample dataset 1" sea clickable
         element = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 2"))
+            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 1"))
         )
 
         # Desplazar la vista hasta el elemento si es necesario
@@ -122,9 +122,9 @@ class TestExplorePage(unittest.TestCase):
         dropdown = self.driver.find_element(By.ID, "tag")
         dropdown.find_element(By.XPATH, "//option[. = 'Any']").click()
 
-        # Espera a que el elemento "Sample dataset 2" sea clickable
+        # Espera a que el elemento "Sample dataset 1" sea clickable
         element = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 2"))
+            EC.element_to_be_clickable((By.LINK_TEXT, "Sample dataset 1"))
         )
 
         # Desplazar la vista hasta el elemento si es necesario
