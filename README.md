@@ -17,6 +17,32 @@ Forked from a repository of feature models in UVL format integrated with Zenodo 
 
 You can consult the official documentation of the project at the folder */docs*. There you can see all the different politics, the team diary, the project document and the founding document, with all the information than may interest you
 
+## Guia ante posibles inconvenientes
+
+### Acerca de la base de datos
+
+Para la configuración e instalación de la base de datos, se deben utilizar los comandos vistos en la asignatura en la práctica 1.
+
+En caso de ocurrir algun error inesperado en el proceso de la misma que dificulte o inhabilite el despliegue del mismo, se deben ejecutar los siguientes comandos:
+
+sudo rm -rf /var/lib/mysql
+sudo rm -rf /etc/mysql
+sudo apt-get purge mariadb-server mariadb-client mariadb-common
+sudo apt-get autoremove
+sudo apt-get autoclean
+
+Tras esto, se deberían repetir los comandos mencionados anteriormente correspondiente a la primera practica.
+
+
+### Acerca de recuperar contraseña por gmail
+
+Para que funcione la implementacion de remember password es necesario tener una cuenta de google, registrarse en local y  generar un archivo .env o en el existente colocar:
+
+MAIL_USERNAME= TU CORREO DE GMAIL
+
+MAIL_PASSWORD= CONTRASEÑA DE APLICACION NECESARIA PARA ELLO
+
+La contraseña de apliacion se optiene desde el apartado de seguridad de google gmail
 
 ## Development Team
 

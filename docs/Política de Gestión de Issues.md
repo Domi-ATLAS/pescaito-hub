@@ -159,4 +159,8 @@ El nuevo **Project** se organiza en columnas que representan el estado de las ta
 
 6. **Fixed:**  
    - Issues relacionadas con correcciones puntuales de errores que ya han sido implementadas y verificadas.  
-   - Representa la finalización de problemas reportados.
+
+   - Representa la finalización de problemas reportados, a falta de subir su resolución a la rama principal o de desarrollo.
+
+Esta estructura proporciona una visión clara del progreso de las tareas, facilitando la priorización, revisión y gestión eficiente de las issues en el proyecto.
+
