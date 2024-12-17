@@ -16,7 +16,7 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -36,19 +36,21 @@ jobs:
       - name: Create temporary package.json
         run: |
           echo '{
+            "name": "temporary-package",
+            "version": "0.0.0-development",
             "private": true,
             "devDependencies": {}
           }' > package.json
-            
+
       - name: Install semantic-release and plugins
         run: |
           npm install --save-dev semantic-release @semantic-release/git @semantic-release/changelog
-            
+
       - name: Run Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
-  
+
       - name: Clean up temporary files
         if: always()
         run: rm package.json package-lock.json
