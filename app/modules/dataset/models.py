@@ -81,7 +81,7 @@ class DataSet(db.Model):
     avgRating = db.Column(db.Float, default = 0.0)
 
     ds_meta_data = db.relationship('DSMetaData', backref=db.backref('data_set', uselist=False))
-    feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="all, delete")
+    feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="save-update, delete")
     ratings = db.relationship('Rate', backref='dataset', lazy=True, cascade="all, delete")  
     def name(self):
         return self.ds_meta_data.title

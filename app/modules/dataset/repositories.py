@@ -129,6 +129,10 @@ class DataSetRepository(BaseRepository):
             # Eliminar los registros relacionados (vistas, descargas)
             self.delete_related_records(dataset)
 
+            # Desvincular los Feature Models sin borrarlos
+            for feature_model in dataset.feature_models:
+                feature_model.data_set = None  # Desvincula la relación
+
             # Eliminar el dataset
             self.session.delete(dataset)
             self.session.commit()
