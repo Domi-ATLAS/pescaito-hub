@@ -119,3 +119,44 @@ La descripción debe contener la siguiente estructura:
 
 ### Reapertura de Issues:
 - Si un issue se cierra prematuramente o el problema persiste, debe reabrirse y actualizarse con nueva información.
+
+## Localización y Archivado de Issues
+
+Para mantener un seguimiento claro y organizado de las issues, se ha implementado la siguiente estrategia de localización y archivado:
+
+1. **Issues Actuales:**
+   - Las issues activas y en progreso se gestionarán en un nuevo **Project de GitHub** llamado **Pescaito HUB**.
+   - Este cambio se debe a la creación de una organización en GitHub que centraliza la gestión del proyecto y facilita la colaboración.
+
+2. **Issues Antiguas:**
+   - Las issues antiguas, relacionadas con fases previas del proyecto o ya completadas, se mantendrán archivadas en el **Project anterior**, denominado **pescaito-hub project**.
+
+---
+
+### Estructura del Nuevo Project "Pescaito HUB"
+
+El nuevo **Project** se organiza en columnas que representan el estado de las tareas de la siguiente manera:
+
+1. **Todo:**  
+   - Tareas pendientes que aún no han sido iniciadas.  
+   - Estas issues requieren revisión y planificación para asignarse a responsables y comenzar su desarrollo.
+
+2. **In Progress:**  
+   - Issues que están activamente en desarrollo.  
+   - Los miembros del equipo están trabajando actualmente en estas tareas.
+
+3. **Staged:**  
+   - Issues que están completadas y listas para su revisión antes de ser integradas al proyecto.  
+   - Aquí se incluyen tareas pendientes de validación final o pruebas de aceptación.
+
+4. **Done:**  
+   - Issues que se han completado y cuyo trabajo ha sido validado.  
+   - Representa el trabajo finalizado y aprobado en la rama principal o de desarrollo.
+
+5. **Stopped:**  
+   - Issues que se han detenido temporalmente debido a bloqueos, dependencias no resueltas o falta de recursos.  
+   - Estas tareas deberán ser revaluadas para identificar las causas del bloqueo y definir próximos pasos.
+
+6. **Fixed:**  
+   - Issues relacionadas con correcciones puntuales de errores que ya han sido implementadas y verificadas.  
+   - Representa la finalización de problemas reportados.
