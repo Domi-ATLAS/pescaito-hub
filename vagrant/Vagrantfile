@@ -22,7 +22,7 @@ def load_env(file)
 end
 
 # Load .env file from the top level and get the loaded variables
-env_file_path = File.expand_path("../../.env", __FILE__)
+env_file_path = File.expand_path("../.env", __dir__)
 puts "Loading .env file from: #{env_file_path}"
 loaded_env_vars = load_env(env_file_path)
 
@@ -84,5 +84,6 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "2048"
     vb.cpus = 4
+    vb.gui = true
   end
 end
