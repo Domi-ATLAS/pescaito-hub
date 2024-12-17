@@ -1,0 +1,43 @@
+name: Vagrant Setup Workflow
+on:
+  push:
+    branches: [main, develop, feature/vagrant]
+  pull_request:
+    branches: [main, develop, feature/vagrant]
+
+jobs:
+  vagrant-deploy:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Copy .env.example.vagrant to .env
+      run: |
+        cp .env.vagrant.example .env
+
+    - name: Navigate to /vagrant Directory
+      working-directory: ./vagrant
+      run: |
+        pwd
+
+    - name: Validate Vagrant Configuration
+      working-directory: ./vagrant
+      run: |
+        vagrant validate
+
+    - name: Start Vagrant Machine
+      working-directory: ./vagrant
+      run: |
+        vagrant up
+
+    - name: Check Application Status
+      working-directory: ./vagrant
+      run: |
+        echo "Waiting for the application to be accessible..."
+        sleep 10
+        curl -I http://localhost:5000 || echo "App not reachable"
+
+    - name: Output Connection Details
+      run: |
+        echo "Service is available at: http://localhost:5000"
