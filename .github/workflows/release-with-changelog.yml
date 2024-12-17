@@ -1,25 +1,27 @@
 name: Release Workflow
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   release:
-    if: >
-      github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.title, 'release')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.8.1'
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,10 +33,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
-      - name: Run semantic-release
+      - name: Create temporary package.json
+        run: |
+          echo '{
+            "private": true,
+            "devDependencies": {}
+          }' > package.json
+            
+      - name: Install semantic-release and plugins
+        run: |
+          npm install --save-dev semantic-release @semantic-release/git @semantic-release/changelog
+            
+      - name: Run Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+  
+      - name: Clean up temporary files
+        if: always()
+        run: rm package.json package-lock.json
