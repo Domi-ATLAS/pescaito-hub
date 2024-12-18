@@ -57,7 +57,7 @@ def test_get_dataset_by_id_not_found(dataset_service):
 def test_update_rating_with_valid_values(dataset_service, app):
     """Probar actualización de rating con valores válidos."""
     with app.app_context():  
-        valid_ratings = [1, 5]
+        valid_ratings = [1, 6]
 
         for rating in valid_ratings:
             mock_rate = Rate(id=1, rating=rating, dataset_id=1, user_id=1)
@@ -73,12 +73,12 @@ def test_update_rating_with_valid_values(dataset_service, app):
 def test_update_rating_with_invalid_values(dataset_service, mock_query, app):
     """Probar actualización de rating con valores inválidos."""
     with app.app_context():
-        invalid_ratings = [0, 6]
+        invalid_ratings = [0, 7]
 
         for rating in invalid_ratings:
             with patch('app.modules.dataset.services.current_user', MagicMock(id=1)):
                 mock_query.return_value.filter_by.return_value.first.return_value = None
-                with pytest.raises(ValueError, match="El valor del rating debe estar entre 1 y 5."):
+                with pytest.raises(ValueError, match="El valor del rating debe estar entre 1 y 6."):
                     dataset_service.update_rating(dataset_id=1, rating=rating)
 
 
